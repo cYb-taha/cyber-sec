@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CyberGrid Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+/* ===================== DESIGN TOKENS ===================== */
+:root{
+  --bg-0:#03050c; --bg-1:#060a16; --bg-2:#0a1024; --panel:#0b1226; --panel-2:#0e1730;
+  --line: rgba(88,220,255,.14); --line-strong: rgba(88,220,255,.32);
+  --cyan:#39e6ff; --cyan-dim:#1c9fc4; --mag:#ff4dd8; --grn:#4dffb0; --ylw:#ffcf4d; --red:#ff5f6d; --amber:#ff9d4d;
+  --ink:#e6f6ff; --ink-dim:#8fa3c4; --ink-faint:#4c5a7a;
+  --font-display:'Orbitron','Segoe UI',Arial,sans-serif;
+  --font-mono:'JetBrains Mono','Share Tech Mono','Courier New',monospace;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:16px;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:18px;--sp-5:26px;--sp-6:38px;--sp-7:56px;
+  --shadow-panel: 0 20px 60px -25px rgba(0,0,0,.7);
+  --shadow-glow-cyan: 0 0 0 1px rgba(57,230,255,.12), 0 0 24px -4px rgba(57,230,255,.35);
+  --shadow-glow-mag: 0 0 0 1px rgba(255,77,216,.12), 0 0 24px -4px rgba(255,77,216,.35);
+  --ease: cubic-bezier(.22,.9,.3,1);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg-0:#eef3fb; --bg-1:#e7eefb; --bg-2:#ffffff; --panel:#ffffff; --panel-2:#f2f6fd;
+    --line: rgba(0,110,190,.16); --line-strong: rgba(0,110,190,.32);
+    --cyan:#0086b3; --cyan-dim:#0086b3; --mag:#b8009a; --grn:#0a9463; --ylw:#9a7300; --red:#c92a3c; --amber:#b5650a;
+    --ink:#0c1830; --ink-dim:#495a7a; --ink-faint:#7c8bac;
+    --shadow-panel: 0 20px 50px -30px rgba(20,40,80,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg-0:#03050c; --bg-1:#060a16; --bg-2:#0a1024; --panel:#0b1226; --panel-2:#0e1730;
+  --line: rgba(88,220,255,.14); --line-strong: rgba(88,220,255,.32);
+  --cyan:#39e6ff; --cyan-dim:#1c9fc4; --mag:#ff4dd8; --grn:#4dffb0; --ylw:#ffcf4d; --red:#ff5f6d; --amber:#ff9d4d;
+  --ink:#e6f6ff; --ink-dim:#8fa3c4; --ink-faint:#4c5a7a;
+}
+*{box-sizing:border-box;}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important;} }
+html,body{height:100%;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0; background:var(--bg-0); color:var(--ink); font-family:var(--font-mono);
+  min-height:100%; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  background-image: radial-gradient(ellipse 900px 500px at 50% -8%, rgba(57,230,255,.10), transparent 65%),
+                     radial-gradient(ellipse 700px 500px at 100% 10%, rgba(255,77,216,.06), transparent 60%);
+  background-attachment: fixed;
+}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg-1);}
+::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:6px;}
+:focus-visible{outline:2px solid var(--cyan); outline-offset:2px; border-radius:4px;}
+h1,h2,h3,h4,.head{font-family:var(--font-display);letter-spacing:.02em;margin:0;font-weight:700;}
+a{color:var(--cyan);}
+button{font-family:var(--font-mono);cursor:pointer;}
+#bgcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;}
+#app{max-width:1180px;margin:0 auto;padding:22px 18px 70px;position:relative;z-index:1;}
+.fade-in{animation:fadeIn .45s var(--ease);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---- top bar ---- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 2px 28px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer;}
+.brand .logo{width:38px;height:38px;border:1.5px solid var(--cyan);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--cyan);box-shadow:var(--shadow-glow-cyan);font-size:18px;background:rgba(57,230,255,.05);}
+.brand .name{font-family:var(--font-display);font-weight:800;font-size:1.12rem;color:var(--ink);letter-spacing:.03em;}
+.brand .name b{color:var(--cyan);font-weight:800;}
+.navbtns{display:flex;gap:6px;flex-wrap:wrap;}
+.navbtns button{background:transparent;border:1px solid transparent;color:var(--ink-dim);padding:8px 14px;border-radius:8px;font-size:.76rem;letter-spacing:.04em;transition:.15s var(--ease);font-weight:500;}
+.navbtns button:hover{color:var(--ink);background:rgba(255,255,255,.04);}
+.navbtns button.active{color:var(--cyan);background:rgba(57,230,255,.08);border-color:var(--line-strong);}
+.userchip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:22px;padding:6px 14px 6px 8px;font-size:.78rem;color:var(--ink-dim);background:var(--panel);}
+.userchip .dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);}
+.userchip b{color:var(--cyan);font-family:var(--font-display);}
+
+/* ---- panels & cards ---- */
+.panel{background:linear-gradient(175deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--radius-lg);padding:26px;position:relative;box-shadow:var(--shadow-panel);}
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:820px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.grid3{grid-template-columns:1fr;}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--cyan);border:1px solid var(--cyan);color:#00121a;padding:12px 22px;border-radius:9px;font-family:var(--font-display);font-size:.78rem;letter-spacing:.04em;font-weight:700;transition:.18s var(--ease);position:relative;}
+.btn:hover{box-shadow:0 6px 24px -6px rgba(57,230,255,.55);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn.outline{background:transparent;color:var(--cyan);}
+.btn.mag{background:var(--mag);border-color:var(--mag);color:#22001a;}
+.btn.mag:hover{box-shadow:0 6px 24px -6px rgba(255,77,216,.55);}
+.btn.mag.outline{background:transparent;color:var(--mag);}
+.btn.grn{background:var(--grn);border-color:var(--grn);color:#00220f;}
+.btn.grn.outline{background:transparent;color:var(--grn);}
+.btn.ylw{background:var(--ylw);border-color:var(--ylw);color:#241800;}
+.btn.ylw.outline{background:transparent;color:var(--ylw);}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink-dim);}
+.btn.ghost:hover{border-color:var(--line-strong);color:var(--ink);box-shadow:none;transform:none;}
+.btn:disabled{opacity:.32;cursor:not-allowed;box-shadow:none !important;transform:none !important;}
+.btn.block{width:100%;}
+
+input[type=text]{background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-family:var(--font-mono);padding:14px 16px;border-radius:9px;font-size:1rem;width:100%;outline:none;transition:.15s;}
+input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(57,230,255,.12);}
+input[type=text]::placeholder{color:var(--ink-faint);}
+
+.progress-track{height:7px;border-radius:5px;background:var(--bg-1);overflow:hidden;border:1px solid var(--line);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--mag));border-radius:5px;transition:width .8s var(--ease);}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;padding:4px 10px;border-radius:20px;border:1px solid var(--line);color:var(--ink-dim);font-weight:500;}
+.badge.on{border-color:var(--grn);color:var(--grn);background:rgba(77,255,176,.08);}
+.badge.gold{border-color:var(--ylw);color:var(--ylw);background:rgba(255,207,77,.08);}
+
+.roomnode{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius-md);padding:16px;cursor:pointer;transition:.18s var(--ease);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;}
+.roomnode:hover{border-color:var(--line-strong);box-shadow:var(--shadow-glow-cyan);transform:translateY(-2px);}
+.roomnode.done{border-color:rgba(77,255,176,.4);}
+.roomnode.done::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grn);}
+.roomnum{font-family:var(--font-display);color:var(--ink-faint);font-size:.68rem;letter-spacing:.06em;}
+.roomstatus{font-size:.66rem;letter-spacing:.05em;color:var(--grn);font-weight:600;}
+
+.catcard{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius-md);padding:20px;cursor:pointer;transition:.18s var(--ease);}
+.catcard:hover{border-color:rgba(255,77,216,.4);box-shadow:var(--shadow-glow-mag);transform:translateY(-2px);}
+.catcard .icon{font-size:1.7rem;line-height:1;}
+
+.qcard{border:1px solid var(--line);background:var(--bg-1);border-radius:var(--radius-md);padding:18px;margin-top:16px;}
+.qopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:13px 15px;border-radius:9px;margin:8px 0;transition:.14s var(--ease);font-family:var(--font-mono);font-size:.9rem;}
+.qopt .oletter{width:24px;height:24px;flex:none;border-radius:6px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-family:var(--font-display);color:var(--ink-dim);}
+.qopt:hover{border-color:var(--line-strong);}
+.qopt.sel{border-color:var(--mag);box-shadow:0 0 0 1px var(--mag);}
+.qopt.sel .oletter{border-color:var(--mag);color:var(--mag);}
+.qopt.correct{border-color:var(--grn);background:rgba(77,255,176,.07);}
+.qopt.correct .oletter{background:var(--grn);border-color:var(--grn);color:#00220f;}
+.qopt.wrong{border-color:var(--red);background:rgba(255,95,109,.07);}
+.qopt.wrong .oletter{background:var(--red);border-color:var(--red);color:#2a0006;}
+.qmeta{font-size:.68rem;color:var(--ink-faint);letter-spacing:.05em;margin-bottom:2px;}
+
+.terminal{background:#00060d;border:1px solid var(--line);border-radius:var(--radius-md);padding:18px 20px;font-size:.87rem;line-height:1.85;font-family:var(--font-mono);}
+.terminal .ln{color:var(--ink);}
+.terminal .ln::before{content:'❯ ';color:var(--grn);}
+
+.diploma{border:1px solid var(--line-strong);border-radius:var(--radius-lg);padding:44px 34px;text-align:center;background:
+  radial-gradient(ellipse 500px 260px at 50% -10%, rgba(255,207,77,.10), transparent 70%), var(--panel);position:relative;}
+.diploma::before,.diploma::after{content:'';position:absolute;width:34px;height:34px;border:2px solid var(--ylw);opacity:.55;}
+.diploma::before{top:14px;left:14px;border-right:none;border-bottom:none;}
+.diploma::after{bottom:14px;right:14px;border-left:none;border-top:none;}
+.diploma h2{color:var(--ylw);font-size:1.6rem;}
+
+.statring{position:relative;width:76px;height:76px;flex:none;}
+.statring svg{transform:rotate(-90deg);}
+.statring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:.95rem;}
+
+.footer-note{color:var(--ink-faint);font-size:.72rem;text-align:center;margin-top:40px;letter-spacing:.02em;}
+
+.lbrow{display:flex;align-items:center;gap:14px;padding:13px 14px;border-bottom:1px solid var(--line);transition:.15s;}
+.lbrow:last-child{border-bottom:none;}
+.lbrow.me{background:rgba(57,230,255,.05);border-radius:9px;}
+.lbrank{font-family:var(--font-display);width:34px;text-align:center;color:var(--ink-dim);font-weight:700;}
+
+.small{font-size:.79rem;color:var(--ink-dim);}
+.faint{color:var(--ink-faint);}
+.center{text-align:center;}
+.mt{margin-top:16px;} .mt2{margin-top:28px;}
+.tag{font-size:.7rem;color:var(--mag);border:1px solid var(--mag);padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:.03em;}
+
+/* toast */
+#toastWrap{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);right:16px;z-index:50;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.toast{background:var(--panel);border:1px solid var(--line-strong);border-radius:9px;padding:12px 18px;font-size:.82rem;box-shadow:var(--shadow-panel);animation:toastIn .3s var(--ease);color:var(--ink);}
+.toast b{color:var(--grn);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.toast.out{animation:toastOut .3s var(--ease) forwards;}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px);}}
+
+/* confetti canvas */
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:60;}
+
+/* boot sequence */
+.boot{font-family:var(--font-mono);font-size:.86rem;color:var(--grn);text-align:left;min-height:120px;white-space:pre-wrap;}
+.caret{display:inline-block;width:8px;height:1em;background:var(--grn);vertical-align:text-bottom;animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+/* lab terminal (VM console) */
+.labwrap{border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;background:#00060d;margin-top:16px;box-shadow:inset 0 0 40px rgba(57,230,255,.03);}
+.labhead{display:flex;align-items:center;gap:7px;padding:9px 14px;background:#000308;border-bottom:1px solid var(--line);}
+.labdot{width:10px;height:10px;border-radius:50%;flex:none;}
+.labdot.r{background:#ff5f6d;} .labdot.y{background:#ffcf4d;} .labdot.g{background:#4dffb0;}
+.labtitle{margin-left:8px;font-size:.7rem;color:var(--ink-faint);letter-spacing:.03em;}
+.labscreen{max-height:260px;overflow-y:auto;padding:14px 16px;font-size:.83rem;line-height:1.65;}
+.labline{white-space:pre-wrap;word-break:break-word;margin:1px 0;}
+.labline.sys{color:var(--ink-faint);}
+.labline.cmd{color:var(--cyan);}
+.labline.out{color:var(--ink-dim);}
+.labline.err{color:var(--red);}
+.labinput-row{display:flex;align-items:center;gap:9px;padding:11px 14px;border-top:1px solid var(--line);background:#000308;}
+.labprompt{color:var(--grn);font-size:.82rem;white-space:nowrap;font-weight:600;}
+.labinput{flex:1;background:transparent;border:none;color:var(--ink);font-family:var(--font-mono);font-size:.86rem;outline:none;min-width:0;}
+.labchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;}
+.chip{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);font-size:.71rem;padding:6px 12px;border-radius:20px;transition:.15s var(--ease);}
+.chip:hover{border-color:var(--cyan);color:var(--cyan);}
+.lablabel{display:flex;align-items:center;gap:8px;color:var(--ink-dim);font-size:.85rem;letter-spacing:.02em;margin-top:22px;font-family:var(--font-display);font-weight:600;}
+
+/* ===================== CERTIFICATE (formal document, distinct from app chrome) ===================== */
+.cert-stage{padding:10px 0 40px;}
+.certsheet{
+  --paper:#f6f1e6; --ink2:#1c2c4c; --ink3:#48557a; --rule: rgba(28,44,76,.35); --gold:#a9862f;
+  position:relative; max-width:760px; margin:0 auto; background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.012) 0px, transparent 1px, transparent 2px),
+    radial-gradient(ellipse 700px 400px at 50% 0%, rgba(28,44,76,.05), transparent 70%),
+    var(--paper);
+  color:var(--ink2); border:1px solid rgba(28,44,76,.25); border-radius:3px;
+  padding:52px 50px 44px; box-shadow:0 30px 70px -30px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.02);
+  font-family:'EB Garamond',Georgia,serif;
+}
+.certsheet::before{content:'';position:absolute;inset:14px;border:1.5px solid var(--rule);pointer-events:none;}
+.certsheet::after{content:'';position:absolute;inset:19px;border:1px solid var(--rule);pointer-events:none;}
+.cert-inner{position:relative;text-align:center;}
+.cert-seal{margin:0 auto 6px;display:block;}
+.cert-kicker{font-family:'EB Garamond',serif;font-style:italic;color:var(--ink3);font-size:.82rem;letter-spacing:.14em;margin-top:14px;}
+.cert-title{font-family:'Playfair Display',Georgia,serif;font-weight:800;color:var(--ink2);font-size:clamp(1.35rem,3.4vw,1.9rem);letter-spacing:.02em;margin-top:8px;line-height:1.25;}
+.cert-rule{width:120px;height:2px;background:var(--gold);margin:16px auto;opacity:.75;}
+.cert-body{font-family:'EB Garamond',Georgia,serif;font-size:1.02rem;line-height:1.75;color:var(--ink2);max-width:560px;margin:0 auto;}
+.cert-body b{font-weight:600;}
+.cert-award-label{font-family:'Playfair Display',serif;font-size:.82rem;letter-spacing:.22em;color:var(--ink3);margin-top:34px;}
+.cert-name{font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:clamp(1.6rem,5vw,2.5rem);color:var(--ink2);margin-top:8px;}
+.cert-role{font-family:'EB Garamond',serif;font-size:.98rem;letter-spacing:.05em;color:var(--ink3);margin-top:6px;font-variant:small-caps;}
+.cert-sigrow{display:flex;justify-content:center;gap:56px;margin-top:44px;flex-wrap:wrap;}
+.cert-sig{text-align:center;}
+.cert-sig .sigline{font-family:'Great Vibes',cursive;font-size:1.7rem;color:var(--ink2);line-height:1;}
+.cert-sig .capline{border-top:1px solid var(--rule);margin-top:6px;padding-top:6px;font-size:.72rem;letter-spacing:.1em;color:var(--ink3);font-family:'EB Garamond',serif;}
+.cert-foot{margin-top:30px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.04em;color:var(--ink3);opacity:.75;}
+.cert-actions{max-width:760px;margin:22px auto 0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+@media(max-width:640px){.certsheet{padding:38px 22px 32px;} .cert-sigrow{gap:32px;}}
+@media print{
+  #bgcanvas,#confettiCanvas,#toastWrap{display:none !important;}
+  .topbar,.btn,.footer-note,.cert-actions{display:none !important;}
+  body{background:#fff !important;}
+  #app{padding:0;max-width:100%;}
+  .certsheet{box-shadow:none;border-color:#333;}
+}
+</style>
+</head>
+<body>
+<canvas id="bgcanvas"></canvas>
+<canvas id="confettiCanvas"></canvas>
+<div id="toastWrap"></div>
+<div id="app"></div>
+
+<script>
+const CATEGORIES = [
+{id:'netfun',name:'Network Fundamentals',icon:'🌐',rooms:[
+{t:'OSI Model Layers',c:['7 layers: Physical, Data Link, Network, Transport, Session, Presentation, Application','Each layer encapsulates data from the layer above it','Troubleshooting often starts at Layer 1 and moves up'],q:[
+{t:'Which OSI layer handles logical addressing and routing?',o:['Data Link','Network','Transport','Session'],a:1},
+{t:'At which layer do switches primarily operate?',o:['Physical','Data Link','Network','Application'],a:1},
+{t:'TCP operates at which OSI layer?',o:['Network','Transport','Session','Presentation'],a:1}]},
+{t:'TCP/IP Suite',c:['TCP is connection-oriented and guarantees delivery via handshakes and acknowledgments','UDP is connectionless, faster, but offers no delivery guarantee',"The TCP/IP model condenses OSI's 7 layers into 4"],q:[
+{t:'Which protocol establishes a 3-way handshake?',o:['UDP','ICMP','TCP','ARP'],a:2},
+{t:'Which is true about UDP?',o:['Guarantees order','Connectionless and fast','Uses handshakes','Always encrypted'],a:1},
+{t:'How many layers does the TCP/IP model have?',o:['3','4','5','7'],a:1}]},
+{t:'Subnetting & CIDR',c:['CIDR notation like /24 indicates the number of network bits','A /24 network has 256 addresses, 254 usable for hosts','Subnetting divides a network into smaller, manageable segments'],q:[
+{t:'How many usable hosts in a /24 subnet?',o:['256','254','128','512'],a:1},
+{t:'What does /26 indicate?',o:['26 host bits','26 network bits','26 subnets','26 broadcast addresses'],a:1},
+{t:'Subnetting primarily helps with?',o:['Encryption','Efficient address allocation','Password policy','DNS caching'],a:1}]},
+{t:'DNS Fundamentals',c:['DNS translates domain names into IP addresses','Record types include A, AAAA, MX, CNAME, and TXT','DNS operates primarily over UDP port 53'],q:[
+{t:'Which record maps a domain to an IPv4 address?',o:['MX','A','CNAME','TXT'],a:1},
+{t:'What port does DNS commonly use?',o:['80','443','53','25'],a:2},
+{t:'An MX record specifies?',o:['Mail servers','Web servers','Name servers','Text data'],a:0}]},
+{t:'DHCP & ARP',c:['DHCP automatically assigns IP addresses via Discover, Offer, Request, Ack','ARP resolves IP addresses to MAC addresses on a local network','ARP spoofing can enable man-in-the-middle attacks'],q:[
+{t:'What does DHCP assign to devices?',o:['MAC addresses','IP addresses','DNS names','Passwords'],a:1},
+{t:'ARP resolves IP addresses to?',o:['Domain names','MAC addresses','Port numbers','Subnet masks'],a:1},
+{t:'An attack exploiting ARP is called?',o:['DNS spoofing','ARP spoofing','SQL injection','XSS'],a:1}]},
+{t:'Routing Basics',c:['Routers forward packets between different networks based on IP addresses','Static routes are manually configured; dynamic routes use protocols like OSPF or BGP','The routing table determines the best path for packets'],q:[
+{t:'Which protocol is used for dynamic routing?',o:['HTTP','OSPF','FTP','SMTP'],a:1},
+{t:'Routers operate mainly at which OSI layer?',o:['Layer 2','Layer 3','Layer 4','Layer 7'],a:1},
+{t:'A static route is?',o:['Auto-learned','Manually configured','Encrypted only','A firewall rule'],a:1}]},
+{t:'Firewalls & ACLs',c:['Firewalls filter traffic based on rules like IP, port, and protocol','ACLs permit or deny traffic on routers/switches','Stateful firewalls track connection state; stateless ones inspect packets individually'],q:[
+{t:'A stateful firewall tracks?',o:['File hashes','Connection state','DNS records','User passwords'],a:1},
+{t:'ACLs are commonly applied on?',o:['Routers and switches','Only servers','Only endpoints','Only cloud storage'],a:0},
+{t:'Firewalls primarily filter based on?',o:['Screen resolution','IP/port/protocol rules','CPU usage','RAM size'],a:1}]},
+{t:'VPNs & Tunneling',c:['VPNs create encrypted tunnels over untrusted networks like the internet','Common protocols include IPsec, OpenVPN, and WireGuard','Split tunneling routes only some traffic through the VPN'],q:[
+{t:'What is the main purpose of a VPN?',o:['Speed up internet','Encrypted tunneling','Block ads','Cache DNS'],a:1},
+{t:'Which is a VPN protocol?',o:['HTTP','IPsec','FTP','SMTP'],a:1},
+{t:'Split tunneling means?',o:['All traffic encrypted','Only some traffic via VPN','No encryption','Double encryption'],a:1}]},
+{t:'Wireshark & Packet Capture',c:['Wireshark captures and analyzes network traffic in real time','Filters like http or ip.addr help isolate relevant packets','Following a TCP stream reconstructs a full conversation'],q:[
+{t:'Wireshark is primarily used for?',o:['Password cracking','Packet capture and analysis','Malware writing','Patch management'],a:1},
+{t:'Which filter shows only HTTP traffic?',o:['tcp.port==80','http','ip.proto==6','dns'],a:1},
+{t:"'Follow TCP Stream' lets you?",o:['Reconstruct a conversation','Delete packets','Encrypt traffic','Block a host'],a:0}]},
+{t:'Nmap Scanning Techniques',c:['Nmap discovers hosts, open ports, and running services','-sS performs a stealthy SYN scan; -sV detects service versions',"Scan results help map an organization's attack surface"],q:[
+{t:'Which flag performs a SYN scan?',o:['-sT','-sS','-sU','-sV'],a:1},
+{t:'What does -sV do?',o:['Version detection','OS detection','Ping sweep','Full connect scan'],a:0},
+{t:'Nmap is mainly used for?',o:['Host/port discovery','Encrypting files','Sending email','Editing logs'],a:0}]},
+{t:'Network Segmentation & VLANs',c:['VLANs logically separate a physical network into isolated broadcast domains','Segmentation limits lateral movement if an attacker breaches one segment','Trunk ports carry traffic for multiple VLANs between switches'],q:[
+{t:'VLANs primarily create?',o:['Faster CPUs','Isolated broadcast domains','More IP addresses','Stronger passwords'],a:1},
+{t:'Why segment a network for security?',o:['Increase speed only','Limit lateral movement','Reduce cost','Simplify DNS'],a:1},
+{t:'A trunk port carries?',o:['One VLAN only','Multiple VLANs','No traffic','Only broadcast traffic'],a:1}]}
+]},
+{id:'linux',name:'Linux & Command Line',icon:'🐧',rooms:[
+{t:'Linux Filesystem Hierarchy',c:['Everything in Linux is a file, rooted at /','/etc holds config files, /var holds variable data like logs','/home contains user directories; /bin and /usr/bin hold executables'],q:[
+{t:'What does /etc contain?',o:['Binaries','Config files','User homes','Temp files'],a:1},
+{t:'Root of the Linux filesystem is denoted by?',o:['C:\\','~','/','root'],a:2},
+{t:'Where do log files typically live?',o:['/var','/home','/bin','/dev'],a:0}]},
+{t:'File Permissions & chmod/chown',c:['Permissions are read(4), write(2), execute(1) for owner, group, others','chmod 755 gives owner full access, others read+execute','chown changes file ownership between users and groups'],q:[
+{t:'chmod 644 grants owner?',o:['Read only','Read+write','Read+write+execute','Execute only'],a:1},
+{t:'Which command changes file ownership?',o:['chmod','chown','chgrp only','ls'],a:1},
+{t:'Execute permission value is?',o:['4','2','1','7'],a:2}]},
+{t:'Users, Groups & sudo',c:['/etc/passwd lists user accounts; /etc/shadow stores hashed passwords','sudo grants temporary elevated privileges per /etc/sudoers rules','Groups let admins manage permissions for multiple users at once'],q:[
+{t:'Where are hashed passwords stored?',o:['/etc/passwd','/etc/shadow','/etc/group','/etc/hosts'],a:1},
+{t:'sudo permissions are configured in?',o:['/etc/sudoers','/etc/passwd','/etc/hosts','/etc/fstab'],a:0},
+{t:'Groups are mainly used to?',o:['Encrypt files','Manage permissions collectively','Store passwords','Schedule tasks'],a:1}]},
+{t:'Bash Scripting Basics',c:['Scripts start with a shebang like #!/bin/bash','Variables are set without spaces: VAR=value','if/for/while loops enable automation of repetitive security tasks'],q:[
+{t:'What does a shebang line specify?',o:['File size','Interpreter to use','Author name','File type'],a:1},
+{t:'Correct variable assignment in bash?',o:['VAR = value','VAR=value','var:value','$VAR=value'],a:1},
+{t:'Which loop repeats while a condition is true?',o:['for','while','case','if'],a:1}]},
+{t:'Process Management',c:['ps and top show running processes and resource usage','kill sends signals to terminate or control processes','Background processes run with & and can be managed via jobs'],q:[
+{t:'Which command lists running processes?',o:['ls','ps','cd','cat'],a:1},
+{t:'How do you send SIGKILL to a process?',o:['kill -9 PID','stop PID','end PID','rm PID'],a:0},
+{t:'Appending & to a command does what?',o:['Runs in background','Deletes output','Pipes to grep','Runs as root'],a:0}]},
+{t:'Package Management',c:['Debian systems use apt/dpkg; RedHat systems use yum/dnf/rpm','Keeping packages updated patches known vulnerabilities','Untrusted repositories can introduce malicious packages'],q:[
+{t:'Which manages packages on Debian/Ubuntu?',o:['yum','apt','rpm','brew'],a:1},
+{t:'Why update packages regularly?',o:['Faster boot','Patch vulnerabilities','Reduce disk space','Change themes'],a:1},
+{t:'RedHat-based systems commonly use?',o:['apt','dnf','dpkg','brew'],a:1}]},
+{t:'Cron & Scheduled Tasks',c:['cron runs scheduled jobs defined in crontab files','Fields represent minute, hour, day, month, weekday','Attackers sometimes abuse cron for persistence'],q:[
+{t:'crontab entries schedule?',o:['Firewall rules','Recurring tasks','User accounts','DNS records'],a:1},
+{t:'Cron can be abused by attackers for?',o:['Encryption','Persistence','Routing','Subnetting'],a:1},
+{t:'A typical cron field order is?',o:['min hour day month weekday','year month day','hour min sec','day hour min'],a:0}]},
+{t:'Log Files & journalctl',c:['Logs in /var/log record system, auth, and application events',"journalctl queries systemd's structured logging system",'Reviewing auth.log helps detect brute-force login attempts'],q:[
+{t:'Where are most Linux logs stored?',o:['/var/log','/etc/log','/home/log','/bin/log'],a:0},
+{t:'journalctl is used with which init system?',o:['SysV','systemd','upstart','none'],a:1},
+{t:'auth.log commonly helps detect?',o:['Disk failures','Brute-force login attempts','DNS issues','Package updates'],a:1}]},
+{t:'SSH & Remote Access',c:['SSH provides encrypted remote shell access on port 22 by default','Key-based authentication is more secure than password authentication','SSH tunneling can forward traffic through an encrypted channel'],q:[
+{t:'Default SSH port is?',o:['21','22','23','443'],a:1},
+{t:'More secure SSH auth uses?',o:['Passwords','Key pairs','Plaintext tokens','No auth'],a:1},
+{t:'SSH tunneling can be used to?',o:['Forward traffic securely','Delete logs','Scan networks','Crack hashes'],a:0}]},
+{t:'grep, awk, sed for Analysts',c:['grep searches text for patterns, useful for filtering logs','awk processes structured text by columns/fields','sed performs stream editing like find-and-replace'],q:[
+{t:'grep is primarily used to?',o:['Search text patterns','Edit files','Compile code','Manage users'],a:0},
+{t:'awk works well with?',o:['Binary files','Column-structured text','Images','Encrypted data'],a:1},
+{t:'sed is used for?',o:['Stream editing','Process killing','Package installs','Network scanning'],a:0}]},
+{t:'Linux Privilege Escalation Basics',c:['Misconfigured SUID binaries can let attackers escalate privileges','Weak sudo rules or writable cron jobs are common vectors','Enumeration scripts help identify privilege escalation paths'],q:[
+{t:'A SUID binary runs with permissions of?',o:['Current user','File owner','Root always','No permissions'],a:1},
+{t:'Which is a common privesc vector?',o:['Weak sudo rules','Strong passwords','Firewall rules','DNS caching'],a:0},
+{t:'Enumeration scripts help attackers/testers?',o:['Encrypt disks','Find privesc paths','Patch systems','Block ports'],a:1}]}
+]},
+{id:'websec',name:'Web Application Security',icon:'🕸️',rooms:[
+{t:'HTTP/HTTPS Fundamentals',c:['HTTP is stateless; cookies/sessions maintain state across requests','HTTPS adds TLS encryption to protect data in transit','Common methods: GET, POST, PUT, DELETE'],q:[
+{t:'HTTPS adds what to HTTP?',o:['Compression','TLS encryption','Caching','Faster DNS'],a:1},
+{t:'HTTP is inherently?',o:['Stateful','Stateless','Encrypted','Peer-to-peer'],a:1},
+{t:'Which method typically submits form data?',o:['GET','POST','HEAD','OPTIONS'],a:1}]},
+{t:'SQL Injection',c:['SQLi occurs when untrusted input is concatenated into SQL queries','Parameterized queries/prepared statements prevent SQL injection','Attackers can extract, modify, or delete database data via SQLi'],q:[
+{t:'Best defense against SQL injection?',o:['Input length limits','Parameterized queries','Longer passwords','More RAM'],a:1},
+{t:'SQLi exploits?',o:['Weak input validation in queries','Weak WiFi passwords','DNS misconfig','Firewall rules'],a:0},
+{t:'A classic SQLi payload example is?',o:["' OR '1'='1",'SELECT * FROM safe','ping -c 4','GET /index'],a:0}]},
+{t:'Cross-Site Scripting (XSS)',c:['XSS injects malicious scripts into pages viewed by other users','Types include stored, reflected, and DOM-based XSS','Output encoding and CSP help mitigate XSS'],q:[
+{t:'XSS primarily targets?',o:['The database',"Other users' browsers",'The server OS','The DNS server'],a:1},
+{t:'Which XSS type persists on the server?',o:['Reflected','Stored','DOM-based','None'],a:1},
+{t:'A key mitigation for XSS is?',o:['Output encoding','More storage','Faster CPU','Bigger passwords'],a:0}]},
+{t:'CSRF',c:["CSRF tricks a logged-in user's browser into unwanted actions",'Anti-CSRF tokens verify requests originate from the legitimate site','SameSite cookie attributes help reduce CSRF risk'],q:[
+{t:'CSRF abuses?',o:["The user's authenticated session",'Weak passwords','DNS servers','Firewalls'],a:0},
+{t:'A common CSRF defense is?',o:['Anti-CSRF tokens','Longer usernames','More cookies','Disabling HTTPS'],a:0},
+{t:'Which cookie attribute helps mitigate CSRF?',o:['Secure','HttpOnly','SameSite','Path'],a:2}]},
+{t:'Authentication & Session Flaws',c:['Weak session management can allow session hijacking or fixation','Passwords should be hashed with salted algorithms like bcrypt','Multi-factor authentication adds a critical extra layer of defense'],q:[
+{t:'A secure password hashing algorithm is?',o:['MD5','bcrypt','Base64','ROT13'],a:1},
+{t:'Session fixation attacks exploit?',o:['Reused session IDs','Weak firewalls','DNS spoofing','SQL syntax'],a:0},
+{t:'MFA stands for?',o:['Multi-Factor Authentication','Managed File Access','Multi-File Auth','Major Firewall Application'],a:0}]},
+{t:'Insecure Direct Object References',c:["IDOR occurs when access control isn't verified on object references","Attackers change IDs in URLs/params to access others' data",'Fix: enforce server-side authorization checks on every request'],q:[
+{t:'IDOR is primarily a failure of?',o:['Encryption','Authorization checks','DNS resolution','Compression'],a:1},
+{t:'A typical IDOR attack changes?',o:['A CSS file','An ID parameter','A DNS record','A firewall rule'],a:1},
+{t:'Best fix for IDOR?',o:['Client-side checks only','Server-side authorization','Hide the URL','Use HTTP not HTTPS'],a:1}]},
+{t:'Security Misconfiguration',c:['Default credentials, verbose errors, and open admin panels are common issues','Unnecessary services and features increase attack surface','Regular configuration audits and hardening reduce risk'],q:[
+{t:'A common misconfiguration is?',o:['Default credentials left active','Strong TLS','Patched software','MFA enabled'],a:0},
+{t:'Verbose error messages can?',o:['Leak sensitive info','Speed up server','Encrypt data','Improve UX only'],a:0},
+{t:'Reducing attack surface means?',o:['Disabling unneeded services','Adding more features','Removing firewalls','Using default passwords'],a:0}]},
+{t:'XML External Entities (XXE)',c:['XXE exploits XML parsers that process external entity references','Can lead to file disclosure, SSRF, or denial of service','Disable external entity processing in XML parsers to prevent it'],q:[
+{t:'XXE attacks target?',o:['XML parsers','CSS engines','DNS resolvers','JSON parsers'],a:0},
+{t:'XXE can lead to?',o:['File disclosure','Faster page loads','Better SEO','Stronger passwords'],a:0},
+{t:'Best XXE mitigation?',o:['Disable external entities','Use bigger fonts','Enable JavaScript','Use cookies'],a:0}]},
+{t:'Server-Side Request Forgery (SSRF)',c:["SSRF tricks a server into making unintended requests on attacker's behalf",'Can be used to reach internal services not exposed externally','Validating and allow-listing outbound destinations helps prevent SSRF'],q:[
+{t:'SSRF forces the server to?',o:['Make unintended requests','Crash instantly','Encrypt disk','Change DNS'],a:0},
+{t:'SSRF is dangerous because it can reach?',o:['Internal-only services','Only the client browser','Only public sites','Only email servers'],a:0},
+{t:'A mitigation for SSRF is?',o:['Allow-listing destinations','Disabling HTTPS','Removing logs','Using weak passwords'],a:0}]},
+{t:'Burp Suite Fundamentals',c:['Burp Suite intercepts and modifies HTTP requests as a proxy','The Repeater tool resends and tweaks requests for testing','The Intruder tool automates fuzzing of parameters'],q:[
+{t:'Burp Suite functions mainly as a?',o:['Firewall','Intercepting proxy','DNS server','Compiler'],a:1},
+{t:'Which Burp tool resends modified requests?',o:['Repeater','Decoder','Comparer','Target'],a:0},
+{t:'Which Burp tool automates fuzzing?',o:['Intruder','Sequencer','Extender','Logger'],a:0}]},
+{t:'OWASP Top 10 Overview',c:['The OWASP Top 10 lists the most critical web app risks','Broken Access Control has ranked among the top risks in recent lists',"It's widely used to guide secure development practices"],q:[
+{t:'OWASP Top 10 is maintained to guide?',o:['Marketing','Secure development','Hardware design','Pricing'],a:1},
+{t:'OWASP stands for?',o:['Open Web Application Security Project','Online Web App Security Panel','Open Wireless App Security Protocol','Organized Web Attack Simulation Program'],a:0},
+{t:'A recurring top risk category is?',o:['Broken Access Control','Slow page loads','Large images','Too many cookies'],a:0}]}
+]},
+{id:'msf',name:'Metasploit & Exploitation',icon:'💀',rooms:[
+{t:'Metasploit Framework Architecture',c:['Metasploit organizes exploits, payloads, auxiliary, and post modules','msfconsole is the primary command-line interface',"Modules can be searched, selected, and configured with 'use' and 'set'"],q:[
+{t:'Which command launches the main Metasploit interface?',o:['msfvenom','msfconsole','msfupdate','msfdb'],a:1},
+{t:'Module types include exploit, payload, and?',o:['Auxiliary','Browser','Router','Firewall'],a:0},
+{t:'The command to select a module is?',o:['run','use','set','exploit'],a:1}]},
+{t:'msfconsole Basics',c:["'search' finds modules by name, CVE, or platform","'show options' lists required parameters for a module","'set' configures parameters like RHOSTS and LHOST"],q:[
+{t:'Which command sets a target IP?',o:['set RHOSTS','run RHOSTS','use RHOSTS','exploit RHOSTS'],a:0},
+{t:'To find modules by keyword, use?',o:['search','show','set','options'],a:0},
+{t:"'show options' displays?",o:['Module parameters','Session list','Payload code','Log files'],a:0}]},
+{t:'Auxiliary Modules & Scanning',c:['Auxiliary modules perform scanning, fuzzing, and enumeration, not exploitation','Examples include port scanners and service version detectors','They help build a picture of the target before exploitation'],q:[
+{t:'Auxiliary modules are mainly used for?',o:['Exploitation','Scanning and enumeration','Payload generation','Reporting'],a:1},
+{t:'A scanner auxiliary module helps?',o:['Encrypt traffic','Gather target information','Delete logs','Patch systems'],a:1},
+{t:'Auxiliary modules typically do NOT?',o:['Scan ports','Gain a shell directly','Enumerate services','Detect versions'],a:1}]},
+{t:'Exploit Modules & Payloads',c:['An exploit takes advantage of a vulnerability to deliver a payload','Payloads can be staged or single, e.g. reverse_tcp shells','LHOST/LPORT configure where a reverse shell connects back to'],q:[
+{t:"A payload's job is to?",o:['Scan ports','Execute code on the target','Patch the OS','Encrypt the disk'],a:1},
+{t:'LHOST typically refers to?',o:['Target IP',"Attacker's listening IP",'DNS server','Gateway'],a:1},
+{t:'A reverse shell connects?',o:['From attacker to target','From target back to attacker','Never connects','Only over UDP'],a:1}]},
+{t:'Meterpreter Basics',c:['Meterpreter is an advanced, in-memory payload for post-exploitation','Commands like sysinfo, getuid, and shell provide target control','It supports file transfer, pivoting, and privilege escalation'],q:[
+{t:'Meterpreter primarily runs?',o:['On disk','In-memory','In the browser','In the BIOS'],a:1},
+{t:"'getuid' in Meterpreter shows?",o:['Current user context','Target OS','Network config','Installed software'],a:0},
+{t:'Meterpreter supports which post-exploitation action?',o:['File transfer','DNS zone transfer','Email spoofing','ARP spoofing only'],a:0}]},
+{t:'Post-Exploitation Techniques',c:['Post-exploitation focuses on maintaining access and gathering value from a compromise','Techniques include credential harvesting, persistence, and lateral movement','Documenting actions is key for professional, ethical engagements'],q:[
+{t:'A post-exploitation goal is often?',o:['Initial scanning','Maintaining access','Writing the report first','Buying tools'],a:1},
+{t:'Lateral movement means?',o:['Moving to other systems on the network','Rebooting the target','Deleting logs only','Changing DNS'],a:0},
+{t:'Why document post-exploitation actions?',o:['For professional reporting','To slow down the test',"It's optional",'To hide from the client'],a:0}]},
+{t:'Pivoting Through Networks',c:['Pivoting uses a compromised host to reach otherwise unreachable networks','Metasploit route commands direct traffic through a session','Pivoting mimics how real attackers move deeper into networks'],q:[
+{t:'Pivoting is used to?',o:['Reach internal networks via a compromised host','Delete files','Encrypt traffic','Patch vulnerabilities'],a:0},
+{t:'In Metasploit, pivoting often uses the?',o:['route command','search command','show command','help command'],a:0},
+{t:'Pivoting mimics?',o:['Real attacker lateral movement','Patch management','DNS caching','Firewall configuration'],a:0}]},
+{t:'Generating Payloads with msfvenom',c:['msfvenom combines payload generation and encoding into one tool','Output formats include exe, elf, apk, and raw shellcode','Encoding can help evade some basic signature-based detection'],q:[
+{t:'msfvenom is used to?',o:['Generate payloads','Scan networks','Manage users','Configure firewalls'],a:0},
+{t:'Which is a valid msfvenom output format?',o:['exe','jpg','mp3','pdf-only'],a:0},
+{t:'Encoding payloads may help evade?',o:['Signature-based detection','Physical security','DNS resolution','Firewall rules entirely'],a:0}]},
+{t:'Exploiting Windows SMB (EternalBlue Case Study)',c:['EternalBlue (MS17-010) exploited a flaw in Windows SMBv1','It famously powered the WannaCry ransomware outbreak in 2017','Patching and disabling SMBv1 are key defenses'],q:[
+{t:'EternalBlue exploited a flaw in?',o:['SMBv1','HTTP','DNS','SSH'],a:0},
+{t:'EternalBlue is associated with which ransomware?',o:['WannaCry','Petya','Locky','Ryuk'],a:0},
+{t:'A key defense against EternalBlue-style attacks is?',o:['Disabling SMBv1 and patching','Using weak passwords','Disabling firewalls','Ignoring updates'],a:0}]},
+{t:'Social Engineering Toolkit',c:['SET automates common social engineering attack vectors like phishing clones','It can generate malicious payloads paired with convincing pretexts','Ethical use requires explicit authorization and scope agreement'],q:[
+{t:'SET is commonly used for?',o:['Automating social engineering attacks','Subnetting','Disk encryption','DNS hosting'],a:0},
+{t:'A SET use case is cloning a?',o:['Website for phishing','Firewall rule','Router config','Database schema'],a:0},
+{t:'Before using SET professionally you need?',o:['Explicit authorization','Nothing at all','A firewall','A VPN only'],a:0}]},
+{t:'Reporting & Responsible Disclosure',c:['A good pentest report includes findings, risk ratings, and remediation steps','Responsible disclosure gives vendors time to fix issues before publication','Clear communication turns technical findings into business risk'],q:[
+{t:'A pentest report should include?',o:['Findings and remediation steps','Only raw tool output','Personal opinions','Nothing technical'],a:0},
+{t:'Responsible disclosure means?',o:['Giving vendors time to fix issues','Publishing immediately','Selling the exploit','Ignoring the vendor'],a:0},
+{t:'Reports should translate technical issues into?',o:['Business risk','Marketing copy','Code comments','Memes'],a:0}]}
+]},
+{id:'crypto',name:'Cryptography',icon:'🔐',rooms:[
+{t:'Symmetric vs Asymmetric Encryption',c:['Symmetric encryption uses one shared key for both encryption and decryption','Asymmetric encryption uses a public/private key pair','Symmetric is faster; asymmetric solves key distribution problems'],q:[
+{t:'AES is an example of?',o:['Asymmetric encryption','Symmetric encryption','A hash function','A protocol'],a:1},
+{t:'Asymmetric encryption uses?',o:['One shared key','A public/private key pair','No keys','Only hashes'],a:1},
+{t:'Which is generally faster?',o:['Symmetric','Asymmetric','Both equal','Neither uses computation'],a:0}]},
+{t:'Hashing Algorithms',c:['Hashes produce a fixed-size output from any input, one-way','SHA-256 is widely used and considered secure today','MD5 and SHA-1 are considered broken for security purposes'],q:[
+{t:'A key property of hash functions is being?',o:['Reversible','One-way','Symmetric','Optional'],a:1},
+{t:'Which hash is considered broken?',o:['SHA-256','MD5','SHA-3','BLAKE2'],a:1},
+{t:'Hash output length is?',o:['Variable based on input','Fixed size','Always 128 bits','Random each time'],a:1}]},
+{t:'Public Key Infrastructure (PKI)',c:['PKI manages digital certificates that bind identities to public keys','Certificate Authorities (CAs) issue and vouch for certificates','Certificates enable trust in HTTPS and code signing'],q:[
+{t:"A CA's role is to?",o:['Issue and vouch for certificates','Encrypt all traffic','Store passwords','Route packets'],a:0},
+{t:'PKI primarily manages?',o:['Digital certificates','Firewall rules','DNS records','Cron jobs'],a:0},
+{t:'HTTPS trust relies on?',o:['PKI and certificates','MAC addresses','VLAN tags','Cron schedules'],a:0}]},
+{t:'TLS/SSL Handshake',c:['The TLS handshake negotiates cipher suites and exchanges keys',"It verifies the server's certificate before data exchange",'Modern TLS (1.2/1.3) replaced insecure older SSL versions'],q:[
+{t:'The TLS handshake establishes?',o:['A shared session key','A VLAN','A cron job','A DNS record'],a:0},
+{t:'Older SSL versions are considered?',o:['Insecure/deprecated','More secure than TLS','Faster only','Irrelevant to security'],a:0},
+{t:'TLS certificates are verified against?',o:['A trusted CA',"The client's hosts file",'A firewall','A DNS cache'],a:0}]},
+{t:'Digital Signatures',c:["Digital signatures verify authenticity and integrity of data using private keys",'Anyone with the public key can verify a signature','Signatures are common in code signing and secure email'],q:[
+{t:"A digital signature is created with the signer's?",o:['Public key','Private key','Session key','Hash salt'],a:1},
+{t:'Signatures are verified using the?',o:['Public key','Private key','Symmetric key','Session ID'],a:0},
+{t:'Digital signatures help ensure?',o:['Authenticity and integrity','Faster downloads','Smaller files','Lower latency'],a:0}]},
+{t:'Password Cracking Concepts (Hashcat/John)',c:['Password cracking tries to recover plaintext from hashes','Dictionary and brute-force attacks are two common approaches','Salting hashes makes precomputed attacks like rainbow tables far harder'],q:[
+{t:'Tools like Hashcat and John are used for?',o:['Password cracking','Packet capture','DNS resolution','Firewall config'],a:0},
+{t:'Salting a hash helps prevent?',o:['Rainbow table attacks','Buffer overflows','DNS spoofing','ARP poisoning'],a:0},
+{t:'A dictionary attack tries?',o:['A list of likely passwords','Every possible byte','Only one guess','Random network scans'],a:0}]},
+{t:'Steganography Basics',c:['Steganography hides data within other files like images or audio','Unlike encryption, it hides the existence of the message itself','Tools can embed or extract hidden data in pixel values'],q:[
+{t:'Steganography primarily aims to?',o:['Hide the existence of data','Encrypt data strongly','Compress files','Speed up transfer'],a:0},
+{t:'A common steganography carrier is?',o:['An image file','A firewall rule','A DNS record','A cron job'],a:0},
+{t:'Steganography differs from encryption because it?',o:['Hides that a message exists','Is always stronger','Requires no key ever','Only works on text'],a:0}]},
+{t:'Cryptographic Attacks',c:['Brute force tries every possible key or password combination','Rainbow tables use precomputed hash chains to speed cracking','Longer keys and salted hashes raise the cost of these attacks'],q:[
+{t:'A rainbow table attack targets?',o:['Unsalted hashes','Encrypted VPN traffic','DNS records','Firewall rules'],a:0},
+{t:'Brute force attacks try?',o:['Every possible combination','Only one guess','No guesses','Only dictionary words'],a:0},
+{t:'A defense against these attacks is?',o:['Salting and longer keys','Shorter passwords','Disabling HTTPS','Removing MFA'],a:0}]},
+{t:'Key Management',c:['Proper key management covers generation, storage, rotation, and destruction','Hardware Security Modules (HSMs) protect keys from extraction','Poor key management undermines even strong cryptographic algorithms'],q:[
+{t:'An HSM is used to?',o:['Protect cryptographic keys','Route packets','Store logs','Scan ports'],a:0},
+{t:'Key rotation refers to?',o:['Periodically changing keys','Deleting all keys','Never changing keys','Sharing keys publicly'],a:0},
+{t:'Weak key management can?',o:['Undermine strong algorithms','Improve security automatically','Have no impact','Speed up encryption'],a:0}]},
+{t:'Blockchain & Crypto Basics',c:['Blockchains use hashing to chain blocks and ensure tamper-evidence','Consensus mechanisms like Proof of Work secure decentralized ledgers','Smart contract vulnerabilities are a growing security concern'],q:[
+{t:'Blockchains rely heavily on?',o:['Hash chaining','DNS servers','Firewalls','VLANs'],a:0},
+{t:'Proof of Work is a type of?',o:['Consensus mechanism','Encryption algorithm','Hash function','Firewall rule'],a:0},
+{t:'A growing blockchain security concern is?',o:['Smart contract bugs','DNS spoofing','ARP poisoning','VLAN hopping'],a:0}]},
+{t:'Common Crypto Mistakes',c:['Using outdated algorithms like DES or MD5 weakens security','Hardcoding keys in source code risks exposure','Rolling your own crypto instead of vetted libraries is risky'],q:[
+{t:'A common crypto mistake is?',o:['Hardcoding keys in code','Using AES-256','Salting hashes','Using TLS 1.3'],a:0},
+{t:'Rolling your own crypto is risky because?',o:["It's often flawed vs vetted libraries","It's always faster","It's always more secure",'It is required by law'],a:0},
+{t:'Using DES today is problematic because?',o:["It's outdated and weak","It's the newest standard","It's asymmetric",'It is a hash function'],a:0}]}
+]},
+{id:'malware',name:'Malware Analysis',icon:'🦠',rooms:[
+{t:'Malware Types & Classification',c:['Categories include viruses, worms, trojans, ransomware, and spyware','Worms self-propagate; trojans disguise themselves as legitimate software','Classification helps analysts choose the right analysis approach'],q:[
+{t:'Which malware type self-replicates across networks?',o:['Trojan','Worm','Spyware','Adware'],a:1},
+{t:'A trojan typically?',o:['Disguises as legitimate software','Self-replicates automatically','Only affects mobile','Is always ransomware'],a:0},
+{t:'Ransomware primarily aims to?',o:['Encrypt data for extortion','Display ads','Log keystrokes only','Mine cryptocurrency only'],a:0}]},
+{t:'Static Analysis Basics',c:['Static analysis examines a file without executing it','Tools inspect strings, headers, and imported functions','Hashing samples helps identify known malware via threat intel'],q:[
+{t:'Static analysis is performed?',o:['Without executing the file','Only while running it','Only in the cloud','Only on Linux'],a:0},
+{t:'Examining strings in a binary can reveal?',o:['Possible URLs or commands',"The exact author's name",'Nothing useful','The hardware used'],a:0},
+{t:'Hashing a sample helps with?',o:['Identifying known malware','Encrypting the sample','Deleting the sample','Patching the OS'],a:0}]},
+{t:'Dynamic Analysis & Sandboxing',c:['Dynamic analysis runs malware in an isolated, monitored environment','Sandboxes capture file, registry, and network activity during execution','Isolation prevents the sample from harming production systems'],q:[
+{t:'Dynamic analysis involves?',o:['Executing the sample safely','Never running the file','Deleting the file first','Ignoring network activity'],a:0},
+{t:'A sandbox is primarily used to?',o:['Isolate and observe malware','Speed up the network','Store passwords','Manage DNS'],a:0},
+{t:'Why isolate malware during analysis?',o:['Prevent harm to production systems','Make it run faster','Improve its code','Hide it from analysts'],a:0}]},
+{t:'PE File Structure',c:['PE (Portable Executable) is the Windows executable file format','It includes headers, sections like .text and .data, and an import table','The import table reveals which Windows APIs a program uses'],q:[
+{t:'PE is the executable format for?',o:['Windows','Linux','macOS','Android'],a:0},
+{t:'The import table shows?',o:['APIs the program uses',"The file's creation date only",'The DNS server used','The firewall rules'],a:0},
+{t:'A common PE section is?',o:['.text','.config','.dns','.vlan'],a:0}]},
+{t:'Obfuscation & Packing',c:['Packers compress/encrypt executables to hide their true code','Obfuscation makes analysis harder without changing functionality','Unpacking is often the first step before deeper static analysis'],q:[
+{t:'Packers are used by malware authors to?',o:['Hide the true code','Speed up execution only','Add legitimate signatures','Improve UI'],a:0},
+{t:'Obfuscation changes?',o:['Code readability, not functionality',"The program's purpose",'The OS','The hardware'],a:0},
+{t:'Before static analysis of packed malware, analysts often?',o:['Unpack it first','Delete it','Ignore it','Encrypt it further'],a:0}]},
+{t:'Command & Control (C2) Basics',c:['C2 infrastructure lets attackers remotely control compromised systems','Beaconing describes malware periodically checking in with a C2 server','Blocking known C2 domains/IPs disrupts attacker communication'],q:[
+{t:'C2 stands for?',o:['Command and Control','Central Cache','Code Compiler','Cyber Cloud'],a:0},
+{t:'Beaconing refers to?',o:['Periodic check-ins with C2','A firewall alert','A DNS record type','A hashing algorithm'],a:0},
+{t:'Blocking C2 domains helps?',o:['Disrupt attacker communication','Speed up DNS','Improve UI','Patch vulnerabilities'],a:0}]},
+{t:'Ransomware Mechanics',c:['Ransomware encrypts victim files and demands payment for the key','Modern variants also exfiltrate data for double extortion','Backups and patching are key ransomware defenses'],q:[
+{t:"Ransomware's main goal is to?",o:['Encrypt files for extortion','Improve performance','Patch software','Route traffic'],a:0},
+{t:'Double extortion involves?',o:['Encrypting and exfiltrating data','Encrypting twice with same key','Only stealing passwords','Only defacing websites'],a:0},
+{t:'A key ransomware defense is?',o:['Regular backups','Disabling firewalls','Removing antivirus','Ignoring updates'],a:0}]},
+{t:'Rootkits & Persistence',c:['Rootkits hide their presence deep within the OS, sometimes at kernel level','Persistence mechanisms ensure malware survives reboots','Registry run keys and scheduled tasks are common persistence spots'],q:[
+{t:'Rootkits are designed to?',o:['Hide their presence','Speed up boot','Improve security','Patch the kernel'],a:0},
+{t:'Persistence ensures malware?',o:['Survives reboots','Deletes itself','Encrypts the disk','Blocks DNS'],a:0},
+{t:'A common Windows persistence location is?',o:['Registry run keys','The hosts file only','The BIOS always','The CPU cache'],a:0}]},
+{t:'YARA Rules',c:['YARA rules identify malware based on textual or binary patterns','Rules combine strings and conditions to match known malware families','Analysts and threat hunters use YARA to scan large file sets'],q:[
+{t:'YARA is primarily used to?',o:['Identify malware by pattern matching','Encrypt files','Route network traffic','Manage DNS'],a:0},
+{t:'A YARA rule typically includes?',o:['Strings and conditions','Only IP addresses','Only file sizes','Only timestamps'],a:0},
+{t:'YARA is popular among?',o:['Threat hunters and analysts','Network admins only','Database admins only','End users only'],a:0}]},
+{t:'Reverse Engineering Intro',c:['Reverse engineering disassembles code to understand its behavior','Tools like Ghidra and IDA convert machine code to assembly','Understanding control flow helps identify malicious functionality'],q:[
+{t:'Reverse engineering aims to?',o:['Understand code behavior','Write new malware','Delete evidence','Encrypt traffic'],a:0},
+{t:'Ghidra and IDA are used for?',o:['Disassembly and analysis','Password cracking','DNS management','Firewall config'],a:0},
+{t:'Understanding control flow helps identify?',o:['Malicious functionality','DNS records','Firewall rules','VLAN tags'],a:0}]},
+{t:'Malware Analysis Lab Setup',c:['Isolated VMs prevent malware from affecting the host or network','Snapshots let analysts revert to a clean state quickly','Network isolation prevents accidental spread or C2 callbacks'],q:[
+{t:'Why use VMs for malware analysis?',o:['Isolation from host system','Faster internet','Better graphics','Cheaper storage'],a:0},
+{t:'VM snapshots allow analysts to?',o:['Revert to a clean state','Permanently delete the VM','Speed up the CPU','Encrypt the sample'],a:0},
+{t:'Network isolation during analysis prevents?',o:['Accidental spread or C2 callbacks','Faster analysis','Better detection','More storage'],a:0}]}
+]},
+{id:'forensics',name:'Digital Forensics',icon:'🔎',rooms:[
+{t:'Forensics Fundamentals & Chain of Custody',c:['Chain of custody documents evidence handling to preserve integrity','Evidence must be collected without altering the original data','Breaks in chain of custody can render evidence inadmissible'],q:[
+{t:'Chain of custody exists to?',o:['Preserve evidence integrity','Speed up analysis','Encrypt evidence','Delete logs'],a:0},
+{t:'A core forensic principle is to?',o:['Avoid altering original evidence','Modify evidence freely','Skip documentation','Ignore timestamps'],a:0},
+{t:'A break in chain of custody can?',o:['Make evidence inadmissible','Improve the case','Speed up the trial','Have no effect'],a:0}]},
+{t:'Disk Imaging',c:['Forensic imaging creates a bit-for-bit copy of a storage device','Write blockers prevent accidental modification of original evidence','Hash values verify the image matches the original exactly'],q:[
+{t:'A forensic disk image is?',o:['A bit-for-bit copy','A summary report','A compressed backup only','A partial copy'],a:0},
+{t:'Write blockers are used to?',o:['Prevent modifying original evidence','Speed up imaging','Encrypt the disk','Delete files'],a:0},
+{t:"Hashes verify an image's?",o:['Integrity/match to original','Encryption strength','File size only','Creation date only'],a:0}]},
+{t:'File System Forensics (NTFS/EXT4)',c:['NTFS uses the Master File Table (MFT) to track files','Deleted files often remain recoverable until overwritten','Metadata like timestamps can reveal file activity history'],q:[
+{t:'NTFS tracks files using the?',o:['Master File Table','DNS table','Routing table','ARP table'],a:0},
+{t:'Deleted files can often be?',o:['Recovered until overwritten','Never recovered','Instantly destroyed','Encrypted automatically'],a:0},
+{t:'File timestamps can reveal?',o:['Activity history','Encryption keys','DNS records','Firewall rules'],a:0}]},
+{t:'Memory Forensics',c:['RAM captures can reveal running processes, network connections, and malware','Tools like Volatility analyze memory dumps for artifacts','Memory analysis can find threats invisible to disk-only forensics'],q:[
+{t:'Memory forensics analyzes?',o:['RAM captures','Disk images only','DNS logs only','Firewall configs only'],a:0},
+{t:'Volatility is used for?',o:['Memory dump analysis','Disk imaging','Password cracking','Network scanning'],a:0},
+{t:'Memory analysis can reveal threats that are?',o:['Invisible to disk-only analysis','Only found in logs','Only found in the BIOS','Only found in DNS'],a:0}]},
+{t:'Windows Registry Analysis',c:['The registry stores system and application configuration data','Keys like Run and RunOnce reveal persistence mechanisms','Registry analysis helps reconstruct user and system activity'],q:[
+{t:'The Windows Registry stores?',o:['Configuration data','Only DNS records','Only firewall rules','Only user passwords'],a:0},
+{t:'Run/RunOnce keys often reveal?',o:['Persistence mechanisms','DNS records','Firewall rules','VLAN configs'],a:0},
+{t:'Registry analysis helps reconstruct?',o:['User/system activity','Network topology','Encryption keys','Physical location'],a:0}]},
+{t:'Timeline Analysis',c:['Timelines correlate timestamps from multiple sources into one sequence',"This reveals the order of attacker actions during an incident",'Tools like log2timeline/plaso automate timeline creation'],q:[
+{t:'Timeline analysis primarily helps?',o:['Reconstruct event order','Encrypt evidence','Patch systems','Configure firewalls'],a:0},
+{t:'Timelines combine data from?',o:['Multiple sources','Only one log file','Only memory','Only the registry'],a:0},
+{t:'A tool used for timeline creation is?',o:['log2timeline/plaso','Wireshark','Nmap','Metasploit'],a:0}]},
+{t:'Network Forensics',c:['Network forensics analyzes captured traffic to reconstruct incidents','PCAP files store raw packet captures for later analysis','NetFlow data shows traffic patterns without full packet content'],q:[
+{t:'Network forensics primarily analyzes?',o:['Captured network traffic','Disk images','Registry keys','Memory dumps'],a:0},
+{t:'PCAP files contain?',o:['Raw packet captures','Only DNS logs','Only firewall logs','Only hashes'],a:0},
+{t:'NetFlow data mainly shows?',o:['Traffic patterns/metadata','Full packet payloads','Encryption keys','User passwords'],a:0}]},
+{t:'Log Analysis & SIEM',c:['SIEM platforms aggregate and correlate logs from many sources','Correlation rules help detect suspicious patterns across systems','Centralized logging speeds up incident detection and response'],q:[
+{t:'SIEM primarily helps with?',o:['Log aggregation and correlation','Disk imaging','Payload generation','DNS hosting'],a:0},
+{t:'Correlation rules help detect?',o:['Suspicious patterns across systems','Faster boot times','Better graphics','Cheaper storage'],a:0},
+{t:'Centralized logging improves?',o:['Incident detection speed','Screen resolution','Network speed only','Password strength'],a:0}]},
+{t:'Mobile Forensics Basics',c:['Mobile forensics recovers data from phones like calls, messages, apps','Physical, logical, and file system extraction are common methods','Encryption and lock screens add significant challenges to mobile extraction'],q:[
+{t:'Mobile forensics recovers data such as?',o:['Calls and messages','Only DNS records','Only firewall logs','Only VLAN configs'],a:0},
+{t:'A challenge in mobile forensics is?',o:['Device encryption','Too much bandwidth','Too many IP addresses','Too few apps'],a:0},
+{t:'Extraction methods include?',o:['Physical and logical extraction','Only visual inspection','Only network capture','Only registry analysis'],a:0}]},
+{t:'Anti-Forensics Techniques',c:['Anti-forensics aims to hinder investigation, e.g. via log wiping or timestomping','Encryption and secure deletion can prevent evidence recovery','Investigators must recognize signs of anti-forensic activity'],q:[
+{t:'Anti-forensics techniques aim to?',o:['Hinder investigations','Improve logging','Speed up analysis','Assist investigators'],a:0},
+{t:'Timestomping refers to?',o:['Altering file timestamps','Deleting DNS records','Blocking firewalls','Encrypting RAM'],a:0},
+{t:'Secure deletion can prevent?',o:['Evidence recovery','Faster boot','Better encryption','Network access'],a:0}]},
+{t:'Incident Response Process',c:['IR phases: Preparation, Identification, Containment, Eradication, Recovery, Lessons Learned',"Containment limits damage while investigation continues",'Post-incident reviews improve future response readiness'],q:[
+{t:'Which is an IR phase?',o:['Containment','Compilation','Subnetting','Routing'],a:0},
+{t:"Containment's goal is to?",o:['Limit damage','Delete all evidence','Ignore the incident','Encrypt logs'],a:0},
+{t:'Lessons Learned reviews help?',o:['Improve future response','Punish the victim','Hide the incident','Increase risk'],a:0}]}
+]},
+{id:'cloud',name:'Cloud Security',icon:'☁️',rooms:[
+{t:'Cloud Service Models (IaaS/PaaS/SaaS)',c:['IaaS provides raw infrastructure like VMs and storage','PaaS offers a platform to build apps without managing servers','SaaS delivers fully managed software over the internet'],q:[
+{t:'Which model gives you raw VMs and storage?',o:['IaaS','PaaS','SaaS','None'],a:0},
+{t:'SaaS examples include?',o:['Email/web apps like Gmail','Raw virtual machines','Bare-metal servers','Only databases'],a:0},
+{t:'PaaS is best described as?',o:['A platform to build apps','Fully managed software','Only storage','Only networking'],a:0}]},
+{t:'Shared Responsibility Model',c:['Cloud providers secure the infrastructure; customers secure their data and config','Misunderstanding this model is a leading cause of cloud breaches','Responsibilities shift depending on IaaS, PaaS, or SaaS'],q:[
+{t:'Under the shared responsibility model, customers usually secure?',o:['Their data and configuration','The physical data center','The hypervisor','The power grid'],a:0},
+{t:'A leading cause of cloud breaches is?',o:['Misunderstanding shared responsibility','Too much encryption','Too many backups','Too few users'],a:0},
+{t:'Responsibility split depends on?',o:['The service model used','The time zone','The company logo','The internet speed'],a:0}]},
+{t:'IAM Fundamentals',c:['IAM controls who can access what resources and actions','Principle of least privilege limits permissions to what is necessary','MFA and strong policies reduce risk of account compromise'],q:[
+{t:'IAM primarily manages?',o:['Access permissions','Network routing','DNS records','Disk encryption only'],a:0},
+{t:'Least privilege means?',o:['Granting only necessary access','Granting full access always','No access at all','Random access levels'],a:0},
+{t:'MFA in IAM helps prevent?',o:['Account compromise','Slow logins','DNS spoofing','VLAN hopping'],a:0}]},
+{t:'AWS S3 Security Misconfigurations',c:['Publicly accessible S3 buckets have caused many major data breaches','Bucket policies and ACLs must be carefully scoped','Enabling logging and encryption helps detect and protect data'],q:[
+{t:'A common S3 misconfiguration is?',o:['Public bucket access','Too much encryption','Too many backups','Too few files'],a:0},
+{t:'Bucket policies control?',o:['Access permissions','DNS records','VLAN tags','CPU usage'],a:0},
+{t:'Enabling S3 logging helps?',o:['Detect suspicious access','Speed up uploads','Reduce storage cost','Improve UI'],a:0}]},
+{t:'Cloud Network Security (VPCs, SGs)',c:['VPCs isolate cloud resources into private virtual networks','Security Groups act as virtual firewalls for instances','Misconfigured security groups can expose services to the internet'],q:[
+{t:'A VPC provides?',o:['An isolated virtual network','A physical firewall','A DNS server','A backup service'],a:0},
+{t:'Security Groups function as?',o:['Virtual firewalls','Storage buckets','DNS resolvers','Load balancers only'],a:0},
+{t:'An overly permissive security group can?',o:['Expose services publicly','Improve performance','Reduce cost','Increase encryption'],a:0}]},
+{t:'Container Security (Docker)',c:['Containers share the host kernel, so isolation is weaker than VMs','Scanning images for vulnerabilities before deployment is a best practice','Running containers as non-root reduces potential impact of a breakout'],q:[
+{t:'Containers share which OS component with the host?',o:['The kernel','The filesystem type only','The IP address','The MAC address'],a:0},
+{t:'Best practice before deploying an image is?',o:['Vulnerability scanning','Skipping updates','Running as root always','Disabling logging'],a:0},
+{t:'Running containers as non-root helps?',o:['Reduce breakout impact','Improve graphics','Speed up boot','Increase storage'],a:0}]},
+{t:'Kubernetes Security Basics',c:['RBAC controls what actions users and services can perform in a cluster','Network policies restrict pod-to-pod communication','Secrets should be encrypted and access tightly restricted'],q:[
+{t:'RBAC in Kubernetes controls?',o:['Access to actions/resources','DNS resolution','Disk encryption','Firewall hardware'],a:0},
+{t:'Network policies in Kubernetes restrict?',o:['Pod-to-pod communication','CPU allocation','Storage size','Image size'],a:0},
+{t:'Kubernetes secrets should be?',o:['Encrypted and access-restricted','Stored in plaintext','Publicly shared','Ignored entirely'],a:0}]},
+{t:'Cloud Logging & Monitoring',c:['Services like CloudTrail log API activity across a cloud account','Alerts on anomalous activity enable faster incident response','Centralized monitoring spans multiple cloud accounts and regions'],q:[
+{t:'CloudTrail-style services log?',o:['API activity','Only network packets','Only DNS queries','Only user passwords'],a:0},
+{t:'Alerting on anomalies helps?',o:['Faster incident response','Slower detection','Higher cost only','Nothing useful'],a:0},
+{t:'Centralized monitoring benefits?',o:['Multi-account/region visibility','Only a single server','Only local networks','Only mobile devices'],a:0}]},
+{t:'Serverless Security',c:['Serverless functions still need secure code and dependency management','Excessive permissions on functions increase the blast radius of a compromise','Event-source validation prevents injection via untrusted triggers'],q:[
+{t:'A serverless security risk is?',o:['Excessive function permissions','Physical server theft','Too many VMs','Too much RAM'],a:0},
+{t:'Serverless functions still require?',o:['Secure code and dependencies','No security at all','Physical firewalls','VLAN tagging'],a:0},
+{t:'Blast radius refers to?',o:['Scope of damage from compromise','Network bandwidth','Disk size','CPU speed'],a:0}]},
+{t:'Cloud Penetration Testing',c:['Cloud pentests must respect provider rules of engagement','Testing covers misconfigurations, IAM flaws, and exposed services','Authorization and scope must be clearly defined before testing'],q:[
+{t:'Cloud pentesting must respect?',o:['Provider rules of engagement','No rules at all','Only local laws','Only company logo guidelines'],a:0},
+{t:'A common cloud pentest focus area is?',o:['Misconfigurations','Physical building security','Employee salaries','Office furniture'],a:0},
+{t:'Before testing, testers need?',o:['Clear authorization and scope','Nothing formal','Just curiosity','A VPN only'],a:0}]},
+{t:'Zero Trust Architecture',c:['Zero Trust assumes no implicit trust, even inside the network perimeter','Every request is verified based on identity, device, and context','Micro-segmentation limits lateral movement even after a breach'],q:[
+{t:'Zero Trust assumes?',o:['No implicit trust anywhere','Full trust inside the network','Only external threats exist','Firewalls alone are enough'],a:0},
+{t:'Zero Trust verifies requests based on?',o:['Identity, device, and context','Only IP address','Only time of day','Only VLAN tag'],a:0},
+{t:'Micro-segmentation helps limit?',o:['Lateral movement after breach','Internet speed','Storage cost','DNS latency'],a:0}]}
+]},
+{id:'osint',name:'Social Engineering & OSINT',icon:'🕵️',rooms:[
+{t:'Social Engineering Principles',c:['Social engineering exploits human psychology rather than technical flaws','Common levers include authority, urgency, and trust','Awareness training is a key defense against these attacks'],q:[
+{t:'Social engineering primarily exploits?',o:['Human psychology','Software bugs','Network protocols','Hardware flaws'],a:0},
+{t:'A common social engineering lever is?',o:['Urgency','Encryption','Subnetting','Routing'],a:0},
+{t:'The best defense against social engineering is?',o:['Security awareness training','More firewalls','Stronger encryption','Faster networks'],a:0}]},
+{t:'Phishing Techniques',c:['Phishing uses deceptive emails to trick victims into actions or data disclosure','Spear phishing targets specific individuals with tailored pretexts','Look-alike domains and urgency are common phishing red flags'],q:[
+{t:'Spear phishing differs from regular phishing by being?',o:['Targeted at specific individuals','Sent via SMS only','Always encrypted','Always anonymous'],a:0},
+{t:'A phishing red flag is?',o:['A look-alike domain','A verified sender','Proper grammar always','A known contact'],a:0},
+{t:'Phishing primarily delivers attacks via?',o:['Deceptive email/messages','Physical mail only','Radio signals','Bluetooth only'],a:0}]},
+{t:'Pretexting & Vishing',c:['Pretexting builds a fabricated scenario to manipulate a target','Vishing is voice/phone-based social engineering','Impersonating IT support is a common pretexting scenario'],q:[
+{t:'Vishing refers to?',o:['Voice-based phishing','Video phishing','Visual phishing','VPN phishing'],a:0},
+{t:'Pretexting relies on?',o:['A fabricated scenario','Malware code','Network scanning','Encryption keys'],a:0},
+{t:'A common pretext is impersonating?',o:['IT support','A firewall','A DNS server','A router'],a:0}]},
+{t:'OSINT Fundamentals',c:['OSINT gathers intelligence from publicly available sources','Sources include websites, social media, public records, and forums','OSINT supports both attackers and defenders in reconnaissance'],q:[
+{t:'OSINT stands for?',o:['Open Source Intelligence','Online Security Investigation Network','Open System Internet','Operational Security Interface'],a:0},
+{t:'OSINT sources include?',o:['Public websites and records','Only internal databases','Only encrypted channels','Only physical mail'],a:0},
+{t:'OSINT is used by?',o:['Both attackers and defenders','Only attackers','Only defenders','Neither'],a:0}]},
+{t:'Google Dorking',c:['Advanced search operators can reveal exposed files and misconfigured pages','Operators like site: and filetype: narrow search results precisely','Dorking can uncover unintentionally indexed sensitive data'],q:[
+{t:'Which operator restricts results to a domain?',o:['site:','filetype:','intitle:','inurl:'],a:0},
+{t:'filetype: is used to find?',o:['Specific file types','Specific IP ranges','Specific dates only','Specific colors'],a:0},
+{t:'Google dorking can reveal?',o:['Unintentionally exposed data','Encrypted passwords directly','Firewall rules','DNS zone files always'],a:0}]},
+{t:'Social Media Reconnaissance',c:['Public social media profiles can reveal roles, relationships, and habits','This information can be weaponized for pretexting or phishing','Privacy settings and awareness reduce oversharing risk'],q:[
+{t:'Social media recon can reveal?',o:['Roles and relationships','Encryption keys','Firewall configs','DNS records'],a:0},
+{t:'This information is often used for?',o:['Crafting pretexts/phishing','Patching software','Routing traffic','Encrypting disks'],a:0},
+{t:'A defense against social media recon is?',o:['Privacy settings and awareness','Public posting only','Ignoring settings','Sharing more data'],a:0}]},
+{t:'Physical Security & Tailgating',c:['Tailgating means following an authorized person through a secure door','Badge cloning and lock bypass are physical security risks','Security culture and challenge policies help prevent tailgating'],q:[
+{t:'Tailgating refers to?',o:['Following someone through a secure door','Cracking passwords','DNS spoofing','ARP poisoning'],a:0},
+{t:'A physical security risk is?',o:['Badge cloning','Strong encryption','MFA','Patching'],a:0},
+{t:'A defense against tailgating is?',o:['A challenge culture at entry points','Ignoring visitors','Removing all doors','Disabling badges'],a:0}]},
+{t:'Email Header Analysis',c:['Email headers reveal the true sending server and routing path','Received: lines trace an email\'s journey across mail servers','SPF, DKIM, and DMARC help verify sender authenticity'],q:[
+{t:'Email headers can reveal?',o:['The true sending server', "The recipient's password",'The firewall rules','The DNS cache'],a:0},
+{t:'Which helps verify sender authenticity?',o:['SPF/DKIM/DMARC','VLAN tagging','ARP resolution','Subnetting'],a:0},
+{t:'Received: header lines show?',o:["The email's routing path","The email's file size",'The attachment type','The font used'],a:0}]},
+{t:'Threat Intelligence Basics',c:['Threat intel provides context on adversary tactics, techniques, and procedures','Frameworks like MITRE ATT&CK catalog known attacker behaviors','Indicators of Compromise (IOCs) help detect known threats'],q:[
+{t:'MITRE ATT&CK catalogs?',o:['Adversary tactics and techniques','DNS records','Firewall rules','VLAN configs'],a:0},
+{t:'IOC stands for?',o:['Indicator of Compromise','Internet Origin Code','Internal Operations Center','Initial Object Check'],a:0},
+{t:'Threat intelligence helps organizations?',o:['Understand adversary behavior','Increase latency','Reduce storage','Simplify DNS'],a:0}]},
+{t:'Security Awareness Training Design',c:['Effective training uses realistic, relevant scenarios like simulated phishing','Regular reinforcement improves long-term behavior change','Measuring click rates and reporting rates tracks program effectiveness'],q:[
+{t:'Effective awareness training often includes?',o:['Simulated phishing exercises','Only annual slideshows','No follow-up','Only legal disclaimers'],a:0},
+{t:'Regular reinforcement helps?',o:['Long-term behavior change','Faster networks','Cheaper hardware','Better graphics'],a:0},
+{t:'Program effectiveness can be measured by?',o:['Click and report rates','Server uptime','DNS latency','VLAN count'],a:0}]},
+{t:'Building an OSINT Report',c:['A good OSINT report organizes findings by source and confidence level','Visualizing relationships (people, domains, infra) aids analysis','Reports should clearly separate facts from analyst assessment'],q:[
+{t:'OSINT reports should organize findings by?',o:['Source and confidence','Random order','Alphabetical only','File size'],a:0},
+{t:'Visualizing relationships helps?',o:['Aid analysis','Slow down analysis','Hide findings','Increase confusion'],a:0},
+{t:'Reports should separate?',o:['Facts from analyst assessment','Fonts from colors','Images from text','Headers from footers'],a:0}]}
+]}
+];
+const FINAL_EXAM = [
+{t:'Which OSI layer is primarily responsible for routing?',o:['Physical','Network','Session','Presentation'],a:1},
+{t:'Which protocol guarantees reliable, ordered delivery?',o:['UDP','ICMP','TCP','ARP'],a:2},
+{t:'SQL injection is fundamentally a failure of?',o:['Input sanitization','Screen resolution','DNS caching','CPU speed'],a:0},
+{t:"Metasploit's primary command-line interface is?",o:['msfvenom','msfconsole','msfdb','msfupdate'],a:1},
+{t:'Which hashing algorithm is considered cryptographically broken?',o:['SHA-256','MD5','SHA-3','BLAKE2'],a:1},
+{t:'The CIA triad stands for?',o:['Confidentiality, Integrity, Availability','Central Intelligence Agency','Cyber Incident Alert','Certified Information Auditor'],a:0},
+{t:'A firewall primarily filters traffic based on?',o:['Screen resolution','IP, port, and protocol rules','CPU usage','RAM size'],a:1},
+{t:'chmod 755 grants the file owner?',o:['Read only','Read, write, and execute','Write only','No permissions'],a:1},
+{t:'Which tool is most associated with packet capture and analysis?',o:['Wireshark','Nmap','Hashcat','Metasploit'],a:0},
+{t:'IAM (Identity and Access Management) primarily controls?',o:['Access permissions to resources','Network cabling','DNS zone files','Physical building layout'],a:0}
+];
+
+/* ============ BACKGROUND CIRCUIT CANVAS ============ */
+(function(){
+  const cv=document.getElementById('bgcanvas');
+  const ctx=cv.getContext('2d');
+  let w,h,nodes=[];
+  function resize(){w=cv.width=window.innerWidth;h=cv.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = reduceMotion ? 0 : Math.min(46, Math.floor((window.innerWidth*window.innerHeight)/34000));
+  for(let i=0;i<N;i++){
+    nodes.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18});
+  }
+  function isLight(){ return getComputedStyle(document.documentElement).getPropertyValue('--bg-0').trim() === '#eef3fb'; }
+  function tick(){
+    ctx.clearRect(0,0,w,h);
+    const light = isLight();
+    const lineCol = light ? 'rgba(0,110,190,ALPHA)' : 'rgba(57,230,255,ALPHA)';
+    const dotCol = light ? 'rgba(0,110,190,.55)' : 'rgba(57,230,255,.55)';
+    nodes.forEach(n=>{
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>w)n.vx*=-1;
+      if(n.y<0||n.y>h)n.vy*=-1;
+    });
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j];
+        const dx=a.x-b.x, dy=a.y-b.y, d=Math.sqrt(dx*dx+dy*dy);
+        if(d<130){
+          ctx.strokeStyle = lineCol.replace('ALPHA', (1-d/130)*0.16);
+          ctx.lineWidth=1;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n=>{ ctx.fillStyle=dotCol; ctx.beginPath(); ctx.arc(n.x,n.y,1.6,0,7); ctx.fill(); });
+    requestAnimationFrame(tick);
+  }
+  if(N>0) tick();
+})();
+
+/* ============ CONFETTI ============ */
+function confettiBurst(){
+  const cv=document.getElementById('confettiCanvas');
+  const ctx=cv.getContext('2d');
+  cv.width=window.innerWidth; cv.height=window.innerHeight;
+  const colors=['#39e6ff','#ff4dd8','#4dffb0','#ffcf4d'];
+  let parts=[];
+  for(let i=0;i<90;i++){
+    parts.push({x:cv.width/2,y:cv.height*0.25,vx:(Math.random()-.5)*11,vy:Math.random()*-7-3,g:.28,r:Math.random()*5+3,c:colors[i%colors.length],rot:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,life:100});
+  }
+  function frame(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    let alive=false;
+    parts.forEach(p=>{
+      if(p.life<=0)return;
+      alive=true;
+      p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life--;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.c;
+      ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx.restore();
+    });
+    if(alive) requestAnimationFrame(frame); else ctx.clearRect(0,0,cv.width,cv.height);
+  }
+  frame();
+}
+
+/* ============ TOASTS ============ */
+function toast(html){
+  const wrap=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast'; el.innerHTML=html;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.classList.add('out'); setTimeout(()=>el.remove(),300);},3200);
+}
+
+/* ============ VM LAB TERMINAL ============ */
+const TERMINAL_LIB = {
+netfun:[
+{trig:'ping',out:c=>{const h=c.split(' ')[1]||'10.10.14.5';return 'PING '+h+' 56(84) bytes of data.\n64 bytes from '+h+': icmp_seq=1 ttl=64 time=11.2 ms\n64 bytes from '+h+': icmp_seq=2 ttl=64 time=10.8 ms\n64 bytes from '+h+': icmp_seq=3 ttl=64 time=11.5 ms\n--- '+h+' ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss';}},
+{trig:'nmap',out:c=>{const t=c.split(' ')[1]||'10.10.14.5';return 'Starting Nmap scan on '+t+' ...\nPORT     STATE  SERVICE\n22/tcp   open   ssh\n80/tcp   open   http\n443/tcp  open   https\n3389/tcp closed ms-wbt-server\nNmap done: 1 IP address scanned in 4.21 seconds';}},
+{trig:'ifconfig',out:'eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>\n  inet 10.10.14.22  netmask 255.255.255.0  broadcast 10.10.14.255\n  ether 02:42:ac:11:00:16'},
+{trig:'ip a',out:'2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>\n  inet 10.10.14.22/24 brd 10.10.14.255 scope global eth0'},
+{trig:'traceroute',out:c=>{const t=c.split(' ')[1]||'10.10.14.5';return 'traceroute to '+t+', 30 hops max\n 1  10.10.14.1   1.221 ms\n 2  10.10.20.1   4.532 ms\n 3  '+t+'   9.884 ms';}},
+{trig:'arp -a',out:'? (10.10.14.1) at 02:42:ac:11:00:01 [ether] on eth0\n? (10.10.14.5) at 02:42:ac:11:00:05 [ether] on eth0'},
+{trig:'netstat',out:'Active Internet connections\nProto Local Address      Foreign Address    State\ntcp   0.0.0.0:22         0.0.0.0:*          LISTEN\ntcp   0.0.0.0:80         0.0.0.0:*          LISTEN'},
+{trig:'cat /etc/hosts',out:'127.0.0.1   localhost\n10.10.14.5  target.cybergrid.lab'},
+{trig:'whoami',out:'agent'},
+{trig:'ls',out:'recon_notes.txt  scan_results.log'}
+],
+linux:[
+{trig:'whoami',out:'agent'},
+{trig:'pwd',out:'/home/agent'},
+{trig:'ls -la',out:'total 24\ndrwxr-xr-x 4 agent agent 4096 Sep 20 09:00 .\ndrwxr-xr-x 3 root  root  4096 Sep 20 08:55 ..\n-rw-r--r-- 1 agent agent  220 Sep 20 08:55 .bash_logout\n-rwxr-xr-x 1 agent agent  512 Sep 20 09:00 backup.sh'},
+{trig:'ls',out:'backup.sh  notes.txt'},
+{trig:'cat /etc/passwd',out:'root:x:0:0:root:/root:/bin/bash\nagent:x:1000:1000:agent:/home/agent:/bin/bash\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin'},
+{trig:'chmod',out:c=>{const p=c.split(' ');return 'permissions updated: '+(p[2]||'file.sh')+' -> mode '+(p[1]||'755');}},
+{trig:'sudo -l',out:'Matching Defaults entries for agent:\n  env_reset\nUser agent may run the following commands:\n  (ALL) NOPASSWD: /usr/bin/vim'},
+{trig:'ps aux',out:'USER  PID  %CPU %MEM COMMAND\nroot    1   0.0  0.1 /sbin/init\nagent 812   0.2  0.3 bash\nagent 900   0.0  0.1 cron'},
+{trig:'cd',out:c=>{const d=c.split(' ')[1]||'~';return 'changed directory to '+d;}},
+{trig:'cat /var/log/auth.log',out:'Sep 20 08:41:02 sshd[901]: Failed password for root from 203.0.113.9 port 51422\nSep 20 08:41:05 sshd[901]: Failed password for root from 203.0.113.9 port 51430\nSep 20 08:42:10 sshd[905]: Accepted password for agent from 10.10.14.1 port 52201'}
+],
+websec:[
+{trig:'curl -i',out:'HTTP/1.1 200 OK\nServer: nginx/1.18.0\nContent-Type: text/html\nSet-Cookie: PHPSESSID=8f3ac1; path=/\nX-Powered-By: PHP/7.4.3'},
+{trig:'curl',out:'<!DOCTYPE html>\n<html><head><title>Login</title></head>\n<body><form action="/login.php" method="POST">\n<input name="username"><input name="password" type="password">\n</form></body></html>'},
+{trig:'cat robots.txt',out:'User-agent: *\nDisallow: /admin/\nDisallow: /backup/\nDisallow: /config.php.bak'},
+{trig:'sqlmap',out:'[*] testing connection to the target URL\n[*] testing \'id\' parameter\n[+] parameter appears injectable via boolean-based blind\n[+] back-end DBMS: MySQL >= 5.0.12'},
+{trig:'whoami',out:'www-data'},
+{trig:'ls',out:'index.php  config.php  admin/  uploads/'}
+],
+msf:[
+{trig:'msfconsole',out:'      =[ metasploit v6.3 ]\n+ -- --=[ 2300+ exploits - 1200+ payloads ]\n+ -- --=[ 400+ post modules ]\nmsf6 >'},
+{trig:'search',out:c=>{const term=c.replace(/^search\s*/,'')||'eternalblue';return 'Matching Modules\n================\nexploit/windows/smb/ms17_010_'+(term.toLowerCase().indexOf('eternal')>-1?'eternalblue':'generic')+'   normal   Windows SMB Remote Code Execution';}},
+{trig:'use',out:c=>{const mod=c.replace(/^use\s*/,'')||'exploit/windows/smb/ms17_010_eternalblue';return 'msf6 exploit('+mod.split('/').pop()+') >';}},
+{trig:'set rhosts',out:c=>'RHOSTS => '+(c.split(' ').pop())},
+{trig:'set payload',out:c=>'PAYLOAD => '+(c.replace(/^set payload\s*/i,'')||'windows/x64/meterpreter/reverse_tcp')},
+{trig:'set lhost',out:c=>'LHOST => '+(c.split(' ').pop())},
+{trig:'exploit',out:'[*] Started reverse TCP handler\n[*] 10.10.14.5:445 - Connecting to target for exploitation.\n[+] 10.10.14.5:445 - Connection established\n[*] Meterpreter session 1 opened'},
+{trig:'run',out:'[*] Sending stage (200262 bytes)\n[*] Meterpreter session 1 opened'},
+{trig:'sessions',out:'Active sessions\n===============\n  Id  Type                Information            Connection\n  --  ----                -----------            ----------\n  1   meterpreter x64/win  NT AUTHORITY\\SYSTEM   10.10.14.22 -> 10.10.14.5'},
+{trig:'getuid',out:'Server username: NT AUTHORITY\\SYSTEM'},
+{trig:'sysinfo',out:'Computer    : TARGET-PC\nOS          : Windows 7 (6.1 Build 7601, Service Pack 1)\nArchitecture: x64\nMeterpreter : x64/windows'}
+],
+crypto:[
+{trig:'sha256sum',out:c=>(c.split(' ').pop()||'file.txt')+'  9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'},
+{trig:'md5sum',out:c=>(c.split(' ').pop()||'file.txt')+'  5d41402abc4b2a76b9719d911017c592'},
+{trig:'openssl',out:'enter aes-256-cbc encryption password:\nVerifying - enter aes-256-cbc encryption password:\nfile encrypted successfully -> secret.enc'},
+{trig:'hashcat',out:'hashcat (v6.2.6) starting...\nDictionary cache built: 14344392 words\nSession..........: hashcat\nStatus...........: Cracked\n5f4dcc3b5aa765d61d8327deb882cf99:password'},
+{trig:'john',out:'Loaded 1 password hash\nPress \'q\' or Ctrl-C to abort\npassword123      (user1)\n1g 0:00:00:02 DONE'},
+{trig:'gpg',out:'gpg: key generation complete\npub   rsa4096 2026-09-20 [SC]\nuid   agent <agent@cybergrid.lab>'}
+],
+malware:[
+{trig:'file',out:c=>(c.split(' ').pop()||'sample.exe')+': PE32 executable (GUI) Intel 80386, for MS Windows'},
+{trig:'strings',out:'http://185.220.101.7/update.php\ncmd.exe /c powershell -enc\nGetProcAddress\nVirtualAllocEx\nRegSetValueExA'},
+{trig:'md5sum',out:c=>(c.split(' ').pop()||'sample.exe')+'  ac1f2b7e9d4c9e21fa0b1a6d9cfa3e21'},
+{trig:'yara',out:'sample.exe matches rule: Suspicious_PE_PackedUPX\nsample.exe matches rule: Possible_C2_URL'},
+{trig:'objdump',out:'08048420 <main>:\n 8048420: 55           push  %ebp\n 8048421: 89 e5        mov   %esp,%ebp\n 8048423: e8 12ffffff  call  8048330'},
+{trig:'ps aux',out:'USER   PID  %CPU %MEM COMMAND\nSYSTEM 1044  12.1  4.2  svch0st.exe\nagent  812   0.2  0.3  explorer.exe'}
+],
+forensics:[
+{trig:'ls',out:'evidence.dd  memory.dmp  auth.log'},
+{trig:'mount',out:'/dev/sdb1 on /mnt/evidence type ntfs (ro,noload)'},
+{trig:'fls',out:'r/r 4-128-1  $MFT\nr/r 5-128-2  Users/agent/Desktop/passwords.txt\nr/r 6-128-3  Windows/System32/config/SAM'},
+{trig:'volatility',out:'Suggested Profile(s): Win7SP1x64\nAS Layer1 : WindowsAMD64PagedMemory\nKDBG      : 0xf80002a1c0a0'},
+{trig:'grep',out:'auth.log:112: Failed password for root from 203.0.113.9\nauth.log:113: Failed password for root from 203.0.113.9\nauth.log:140: Accepted password for agent from 10.10.14.1'},
+{trig:'log2timeline',out:'Processing started...\nEvents processed: 48213\nTimeline written to timeline.plaso'}
+],
+cloud:[
+{trig:'aws s3',out:'2026-09-01 14:22:03  company-backups-prod\n2026-08-14 09:11:44  public-assets-dev\n2026-07-30 17:02:10  logs-archive'},
+{trig:'aws iam',out:'UserName        CreateDate\nadmin           2025-01-14\ndeploy-bot      2025-03-02'},
+{trig:'aws ec2',out:'InstanceId   State    Type        PublicIp\ni-0a1b2c3d   running  t3.medium   34.201.11.9\ni-0e5f6a7b   stopped  t3.small    -'},
+{trig:'kubectl',out:'NAME                READY   STATUS    RESTARTS\nweb-7d9f8-abc12     1/1     Running   0\napi-5c6b7-def34     1/1     Running   2'},
+{trig:'docker ps',out:'CONTAINER ID  IMAGE        STATUS        PORTS\na1b2c3d4e5f6  nginx:latest Up 2 hours    0.0.0.0:80->80/tcp'}
+],
+osint:[
+{trig:'whois',out:c=>{const d=c.split(' ').pop()||'example.com';return 'Domain Name: '+d+'\nRegistrar: NameCheap Inc.\nCreation Date: 2018-04-11\nRegistrant Organization: REDACTED FOR PRIVACY';}},
+{trig:'dig',out:c=>{const d=c.split(' ').pop()||'example.com';return ';; ANSWER SECTION:\n'+d+'.  300  IN  A   93.184.216.34\n'+d+'.  300  IN  MX  10 mail.'+d+'.';}},
+{trig:'nslookup',out:c=>{const d=c.split(' ').pop()||'example.com';return 'Server:  10.10.14.1\nAddress: 10.10.14.1#53\nName: '+d+'\nAddress: 93.184.216.34';}},
+{trig:'theharvester',out:'[*] Target: cybergrid.lab\n[*] Searching...\nEmails found: 3\n  admin@cybergrid.lab\n  hr@cybergrid.lab\n  support@cybergrid.lab'},
+{trig:'curl',out:'<!DOCTYPE html><html><head><title>CyberGrid Corp</title></head>\n<body>Contact: press@cybergrid.lab</body></html>'}
+]
+};
+let TERM_SCROLL = {};
+function ensureScroll(key){ if(!TERM_SCROLL[key]) TERM_SCROLL[key]=[{type:'sys',text:'CyberGrid Lab Console — type \'help\' to see available commands for this room.'}]; return TERM_SCROLL[key]; }
+function helpText(catId){ const lib=TERMINAL_LIB[catId]||[]; return 'Available commands:\n  '+lib.map(e=>e.trig).concat(['help','clear']).join(', '); }
+function findResponse(catId, cmdRaw){
+  const cmd = cmdRaw.trim();
+  const low = cmd.toLowerCase();
+  if(low==='clear') return {clear:true};
+  if(low==='help') return {text:helpText(catId), recognized:false, isHelp:true};
+  const lib = (TERMINAL_LIB[catId]||[]).slice().sort((a,b)=>b.trig.length-a.trig.length);
+  for(const entry of lib){
+    if(low===entry.trig || low.indexOf(entry.trig+' ')===0){
+      return {text: typeof entry.out==='function' ? entry.out(cmd) : entry.out, recognized:true};
+    }
+  }
+  return {text:'command not found: '+cmd.split(' ')[0]+"  (type 'help' for available commands)", recognized:false};
+}
+function renderTerminal(catId, idx){
+  const key=roomKey(catId, idx);
+  const scroll=ensureScroll(key);
+  const lib=TERMINAL_LIB[catId]||[];
+  let s='<div class="labwrap"><div class="labhead"><span class="labdot r"></span><span class="labdot y"></span><span class="labdot g"></span><span class="labtitle">agent@cybergrid-lab · '+catId+'-sim</span></div>';
+  s+='<div class="labscreen" id="labscreen_'+key+'">';
+  scroll.forEach(line=>{
+    const cls = line.type==='cmd'?'cmd':(line.type==='err'?'err':(line.type==='sys'?'sys':'out'));
+    const prefix = line.type==='cmd' ? 'agent@cybergrid:~$ ' : '';
+    s+='<div class="labline '+cls+'">'+esc(prefix+line.text)+'</div>';
+  });
+  s+='</div>';
+  s+='<div class="labinput-row"><span class="labprompt">$</span><input type="text" class="labinput" id="labinput_'+key+'" placeholder="type a command… try: '+esc(lib[0]?lib[0].trig:'help')+'" autocomplete="off" spellcheck="false" onkeydown="if(event.key===\'Enter\')runLabCommand(\''+catId+'\','+idx+')"></div>';
+  s+='</div>';
+  s+='<div class="labchips">';
+  lib.slice(0,6).forEach(e=>{
+    s+='<button class="chip" onclick="fillLabInput(\''+key+'\',\''+e.trig.replace(/'/g,"")+' \')">'+esc(e.trig)+'</button>';
+  });
+  s+='<button class="chip" onclick="fillLabInput(\''+key+'\',\'help\')">help</button>';
+  s+='</div>';
+  s+='<div class="small mt" style="color:'+(ST.labDone[key]?'var(--grn)':'var(--amber)')+';">'+(ST.labDone[key]?'✔ Lab practiced — quiz unlocked below':'Run at least one recognized command to unlock the knowledge check below.')+'</div>';
+  return s;
+}
+function fillLabInput(key, text){ const el=document.getElementById('labinput_'+key); if(el){ el.value=text; el.focus(); } }
+function runLabCommand(catId, idx){
+  const key=roomKey(catId, idx);
+  const inp=document.getElementById('labinput_'+key);
+  if(!inp) return;
+  const val=inp.value;
+  if(!val.trim()) return;
+  const scroll=ensureScroll(key);
+  scroll.push({type:'cmd', text:val});
+  const res=findResponse(catId, val);
+  if(res.clear){
+    TERM_SCROLL[key]=[{type:'sys',text:'Console cleared.'}];
+  } else {
+    scroll.push({type: res.recognized ? 'out' : (res.isHelp?'sys':'err'), text: res.text});
+    if(res.recognized && !ST.labDone[key]){
+      ST.labDone[key]=true; saveState();
+      toast('🖥 <b>Lab practiced</b> — quiz unlocked');
+    }
+  }
+  inp.value='';
+  updateRoomDynamic(catId, idx);
+}
+function updateRoomDynamic(catId, idx){
+  const key=roomKey(catId, idx);
+  const labEl=document.getElementById('labArea'); if(labEl) labEl.innerHTML=renderTerminal(catId, idx);
+  const footEl=document.getElementById('roomFooter'); if(footEl) footEl.innerHTML=roomFooterHtml(catId, idx);
+  const sc=document.getElementById('labscreen_'+key); if(sc) sc.scrollTop=sc.scrollHeight;
+  const inp=document.getElementById('labinput_'+key); if(inp) inp.focus();
+}
+function roomFooterHtml(catId, idx){
+  const key=roomKey(catId, idx);
+  if(ST.completed[key]) return '<span class="badge on">✔ Room cleared</span>';
+  if(!ST.labDone[key]) return '<span class="small" style="color:var(--amber);">🔒 Practice a command in the lab terminal above to unlock the quiz.</span>';
+  return '<button class="btn grn" onclick="submitRoomQuiz()">Submit answers</button>';
+}
+
+/* ============ STATE ============ */
+const SK='cga_state_v3';
+function defaultState(){return {username:null,xp:0,completed:{},examScore:0,examPassed:false,diplomas:{},labDone:{},createdAt:Date.now()};}
+let ST = loadState();
+function loadState(){try{const raw=localStorage.getItem(SK);if(raw)return Object.assign(defaultState(),JSON.parse(raw));}catch(e){}return defaultState();}
+function saveState(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){} syncLeaderboard();}
+
+function totalRooms(){return CATEGORIES.reduce((s,c)=>s+c.rooms.length,0);}
+function completedCount(){return Object.keys(ST.completed).length;}
+function diplomaCount(){return Object.keys(ST.diplomas).length;}
+function computeXP(){return completedCount()*25 + diplomaCount()*50 + (ST.examPassed?500:0);}
+function isGrandmaster(){return completedCount()>=totalRooms() && ST.examPassed;}
+function catProgress(cat){let done=0;cat.rooms.forEach((r,i)=>{if(ST.completed[roomKey(cat.id,i)])done++;});return done;}
+function roomKey(catId,idx){return catId+'#'+idx;}
+function markRoomComplete(catId,idx){
+  const k=roomKey(catId,idx);
+  let newDiploma=false;
+  if(!ST.completed[k]){
+    ST.completed[k]=true;
+    toast('<b>+25 XP</b> — room cleared');
+  }
+  const cat=CATEGORIES.find(c=>c.id===catId);
+  if(catProgress(cat)>=cat.rooms.length && !ST.diplomas[catId]){
+    ST.diplomas[catId]=true; newDiploma=true;
+  }
+  ST.xp=computeXP();
+  saveState();
+  if(newDiploma){ setTimeout(()=>{confettiBurst(); toast('🏅 <b>Diploma earned</b> — '+esc(cat.name));},200); }
+}
+
+/* ============ DB / LEADERBOARD ============ */
+let dbNs=null, dbReady=false, lbCache=[];
+async function initDb(){
+  try{
+    dbNs = await claude.use('db');
+    dbReady = !!dbNs;
+    if(dbReady){
+      dbNs.collection('leaderboard').orderBy('xp','desc').limit(20).onSnapshot(function(snap){
+        lbCache = snap.docs.map(d=>d.data());
+        if(ST._screen==='leaderboard') render();
+      }, function(err){});
+      if(ST.username) syncLeaderboard();
+    }
+  }catch(e){ dbReady=false; }
+}
+function syncLeaderboard(){
+  if(!dbReady || !dbNs || !ST.username) return;
+  try{
+    dbNs.collection('leaderboard').doc(safeId(ST.username)).set({
+      username:ST.username, xp:computeXP(), rooms:completedCount(),
+      diplomas:diplomaCount(), examPassed:!!ST.examPassed, grandmaster:isGrandmaster(),
+      updatedAt: Date.now()
+    }).catch(function(){});
+  }catch(e){}
+}
+function safeId(name){return name.toLowerCase().replace(/[^a-z0-9_\-]/g,'_').slice(0,60)||'agent';}
+
+/* ============ NAV / RENDER ============ */
+ST._screen = ST.username ? 'dashboard' : 'login';
+ST._activeCat = null;
+ST._activeRoom = null;
+ST._quizSel = {};
+
+function go(screen, extra){
+  ST._screen = screen;
+  if(extra) Object.assign(ST, extra);
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function animateCount(el, to, dur){
+  if(!el) return;
+  const from=0; const start=performance.now();
+  function step(now){
+    const p=Math.min(1,(now-start)/dur);
+    const eased=1-Math.pow(1-p,3);
+    el.textContent = Math.round(from+(to-from)*eased);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+function ring(pct,color,size){
+  size=size||76; const r=(size-10)/2, c=2*Math.PI*r, off=c*(1-pct/100);
+  return '<div class="statring" style="width:'+size+'px;height:'+size+'px;"><svg width="'+size+'" height="'+size+'">'+
+    '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="var(--line)" stroke-width="6"/>'+
+    '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" style="transition:stroke-dashoffset 1s cubic-bezier(.22,.9,.3,1);"/>'+
+    '</svg><div class="num" style="color:'+color+';">'+Math.round(pct)+'%</div></div>';
+}
+
+function topbar(active){
+  const un = ST.username || '';
+  return '<div class="topbar">'+
+    '<div class="brand" onclick="go(\''+(ST.username?'dashboard':'login')+'\')"><div class="logo">🛡</div><div class="name">CyberGrid <b>Academy</b></div></div>'+
+    (ST.username ? (
+    '<div class="navbtns">'+
+      '<button class="'+(active==='dashboard'?'active':'')+'" onclick="go(\'dashboard\')">Dashboard</button>'+
+      '<button class="'+(active==='categories'?'active':'')+'" onclick="go(\'categories\')">Rooms</button>'+
+      '<button class="'+(active==='diplomas'?'active':'')+'" onclick="go(\'diplomas\')">Diplomas</button>'+
+      '<button class="'+(active==='leaderboard'?'active':'')+'" onclick="go(\'leaderboard\')">Leaderboard</button>'+
+    '</div>'+
+    '<div class="userchip"><span class="dot"></span> <b>'+esc(un)+'</b>&nbsp;·&nbsp;'+computeXP()+' XP</div>'
+    ):'')+
+  '</div>';
+}
+
+function render(){
+  const app = document.getElementById('app');
+  let html='';
+  if(ST._screen==='login') html=viewLogin();
+  else if(ST._screen==='dashboard') html=viewDashboard();
+  else if(ST._screen==='categories') html=viewCategories();
+  else if(ST._screen==='category') html=viewCategory();
+  else if(ST._screen==='room') html=viewRoom();
+  else if(ST._screen==='diplomas') html=viewDiplomas();
+  else if(ST._screen==='leaderboard') html=viewLeaderboard();
+  else if(ST._screen==='finalexam') html=viewFinalExam();
+  else if(ST._screen==='grandmaster') html=viewGrandmaster();
+  else if(ST._screen==='certificate') html=viewCert(ST._certCat);
+  else html=viewLogin();
+  app.innerHTML = '<div class="fade-in">'+html+'</div>';
+  const xpEl=document.getElementById('xpCounter');
+  if(xpEl) animateCount(xpEl, computeXP(), 900);
+}
+
+/* ---- LOGIN (with boot sequence) ---- */
+function viewLogin(){
+  return ''+
+  '<div style="min-height:78vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 10px;">'+
+    '<div style="font-size:2.6rem;">🛡</div>'+
+    '<h1 class="head" style="color:var(--ink);font-size:clamp(1.6rem,5vw,2.4rem);margin-top:14px;">CyberGrid <span style="color:var(--cyan);">Academy</span></h1>'+
+    '<div class="small" style="max-width:480px;margin-top:12px;">A training grid built for the next generation of defenders — 100 rooms across networking, Linux, exploitation, cryptography, forensics, cloud and OSINT. Clear a domain, earn its diploma, and climb the leaderboard.</div>'+
+    '<div class="panel mt2" style="max-width:440px;width:100%;text-align:left;">'+
+      '<div class="boot" id="bootText"></div>'+
+      '<div id="loginForm" style="display:none;">'+
+        '<input type="text" id="loginInput" placeholder="choose a callsign…" maxlength="24" onkeydown="if(event.key===\'Enter\')doLogin()">'+
+        '<button class="btn block mt" onclick="doLogin()">Access the grid</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="footer-note">100 rooms · 9 domains · Diplomas · Live leaderboard · No real credentials required</div>'+
+  '</div>';
+}
+function runBoot(){
+  const lines=['INITIALIZING CYBERGRID CONNECTION...','LOADING TRAINING MODULES [9 DOMAINS / 100 ROOMS]...','ESTABLISHING SECURE SESSION...','ACCESS GRANTED.'];
+  const el=document.getElementById('bootText');
+  if(!el) return;
+  let out='';
+  let li=0;
+  function typeLine(){
+    if(li>=lines.length){ el.innerHTML=out; document.getElementById('loginForm').style.display='block'; const inp=document.getElementById('loginInput'); if(inp) inp.focus(); return; }
+    const line=lines[li]; let ci=0;
+    function typeChar(){
+      if(ci<=line.length){
+        el.innerHTML = out + line.slice(0,ci) + '<span class="caret"></span>';
+        ci++; setTimeout(typeChar, 12);
+      } else { out += line + '\n'; li++; setTimeout(typeLine, 120); }
+    }
+    typeChar();
+  }
+  typeLine();
+}
+function doLogin(){
+  const v = document.getElementById('loginInput').value.trim();
+  if(!v){document.getElementById('loginInput').focus();return;}
+  ST.username = v.slice(0,24);
+  saveState();
+  initDb();
+  go('dashboard');
+}
+
+/* ---- DASHBOARD ---- */
+function viewDashboard(){
+  const tot=totalRooms(), done=completedCount(), pct=Math.round(done/tot*100);
+  const gm=isGrandmaster();
+  let html = topbar('dashboard');
+  html+='<div class="grid2">';
+  html+='<div class="panel">'+
+    '<div class="small" style="color:var(--cyan);letter-spacing:.04em;">Welcome back, agent</div>'+
+    '<h2 class="head" style="font-size:1.5rem;margin-top:4px;">'+esc(ST.username)+'</h2>'+
+    '<div style="display:flex;align-items:center;gap:18px;margin-top:20px;">'+
+      ring(pct,'var(--cyan)')+
+      '<div style="flex:1;">'+
+        '<div class="small">Grid completion</div>'+
+        '<div class="progress-track mt" style="margin-top:8px;"><div class="progress-fill" style="width:'+pct+'%;"></div></div>'+
+        '<div class="small mt">'+done+' / '+tot+' rooms cleared</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="grid3 mt2">'+
+      '<div style="text-align:center;padding:14px 6px;border:1px solid var(--line);border-radius:10px;"><div class="head" style="color:var(--grn);font-size:1.3rem;" id="xpCounter">0</div><div class="small">XP</div></div>'+
+      '<div style="text-align:center;padding:14px 6px;border:1px solid var(--line);border-radius:10px;"><div class="head" style="color:var(--ylw);font-size:1.3rem;">'+diplomaCount()+'/9</div><div class="small">Diplomas</div></div>'+
+      '<div style="text-align:center;padding:14px 6px;border:1px solid var(--line);border-radius:10px;"><div class="head" style="color:var(--mag);font-size:1.3rem;">'+(ST.examPassed?'100%':(ST.examScore+'/10'))+'</div><div class="small">Final exam</div></div>'+
+    '</div>'+
+    (gm?'<div class="mt2 center"><span class="badge gold">★ Grandmaster certified</span></div>':'')+
+  '</div>';
+  html+='<div class="panel">'+
+    '<div class="small" style="color:var(--cyan);letter-spacing:.04em;">Mission control</div>'+
+    '<h3 class="head mt" style="font-size:1.05rem;">Where to next?</h3>'+
+    '<div class="mt" style="display:flex;flex-direction:column;gap:10px;">'+
+      '<button class="btn block" onclick="go(\'categories\')">Enter the room grid</button>'+
+      '<button class="btn mag outline block" onclick="go(\'diplomas\')">View diplomas</button>'+
+      '<button class="btn grn outline block" onclick="go(\'leaderboard\')">Leaderboard</button>'+
+      (done>=tot ? '<button class="btn ylw block" onclick="go(\'finalexam\')">Take the final certification exam</button>' :
+      '<button class="btn ghost block" disabled>Final exam — clear all 99 rooms first</button>')+
+    '</div>'+
+  '</div>';
+  html+='</div>';
+  html+='<div class="mt2">'+categoryGridPreview()+'</div>';
+  return html;
+}
+function categoryGridPreview(){
+  let s='<h3 class="head" style="color:var(--ink-dim);font-size:.85rem;letter-spacing:.04em;margin-bottom:14px;font-weight:600;">Domains</h3><div class="grid3">';
+  CATEGORIES.forEach(cat=>{
+    const done=catProgress(cat), tot=cat.rooms.length, on=ST.diplomas[cat.id];
+    s+='<div class="catcard" onclick="go(\'category\',{_activeCat:\''+cat.id+'\'})">'+
+      '<div class="icon">'+cat.icon+'</div>'+
+      '<div class="head" style="font-size:.92rem;margin-top:8px;">'+esc(cat.name)+'</div>'+
+      '<div class="progress-track mt" style="margin-top:10px;"><div class="progress-fill" style="width:'+Math.round(done/tot*100)+'%;"></div></div>'+
+      '<div class="small mt" style="display:flex;justify-content:space-between;align-items:center;">'+done+'/'+tot+'<span class="badge '+(on?'on':'')+'">'+(on?'✔ diploma':'in progress')+'</span></div>'+
+    '</div>';
+  });
+  s+='</div>';
+  return s;
+}
+
+/* ---- CATEGORIES LIST ---- */
+function viewCategories(){
+  let html=topbar('categories');
+  html+='<h2 class="head" style="color:var(--ink);font-size:1.4rem;">The room grid</h2><div class="small mt">100 rooms across 9 domains. Clear all 11 rooms in a domain to earn its diploma.</div>';
+  html+='<div class="mt2">'+categoryGridPreview()+'</div>';
+  return html;
+}
+
+/* ---- CATEGORY (rooms) ---- */
+function viewCategory(){
+  const cat=CATEGORIES.find(c=>c.id===ST._activeCat);
+  if(!cat) return viewCategories();
+  const done=catProgress(cat);
+  let html=topbar('categories');
+  html+='<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'+
+    '<button class="btn ghost" onclick="go(\'categories\')">← Back</button>'+
+    '<h2 class="head" style="color:var(--ink);font-size:1.3rem;">'+cat.icon+' '+esc(cat.name)+'</h2>'+
+    (ST.diplomas[cat.id]?'<span class="badge gold">✔ Diploma earned</span>':'<span class="small">'+done+'/'+cat.rooms.length+' cleared</span>')+
+  '</div>';
+  html+='<div class="grid3 mt2">';
+  cat.rooms.forEach((r,i)=>{
+    const roomDone = ST.completed[roomKey(cat.id,i)];
+    html+='<div class="roomnode '+(roomDone?'done':'')+'" onclick="go(\'room\',{_activeRoom:'+i+',_quizSel:{}})">'+
+      '<div class="roomnum">ROOM '+(i+1)+' / '+cat.rooms.length+'</div>'+
+      '<div style="font-family:var(--font-display);font-size:.9rem;font-weight:600;">'+esc(r.t)+'</div>'+
+      (roomDone?'<div class="roomstatus">✔ Cleared</div>':'<div class="small faint">Not started</div>')+
+    '</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+/* ---- ROOM ---- */
+function viewRoom(){
+  const cat=CATEGORIES.find(c=>c.id===ST._activeCat);
+  if(!cat) return viewCategories();
+  const idx=ST._activeRoom;
+  const room=cat.rooms[idx];
+  const done = ST.completed[roomKey(cat.id,idx)];
+  let html=topbar('categories');
+  html+='<button class="btn ghost" onclick="go(\'category\')">← Back to '+esc(cat.name)+'</button>';
+  html+='<div class="panel mt2">';
+  html+='<div class="small" style="color:var(--ink-faint);">'+cat.icon+' '+esc(cat.name)+' · Room '+(idx+1)+' of '+cat.rooms.length+'</div>';
+  html+='<h2 class="head" style="color:var(--ink);margin-top:8px;font-size:1.4rem;">'+esc(room.t)+'</h2>';
+  html+='<div class="terminal mt2">';
+  room.c.forEach(line=>{html+='<div class="ln">'+esc(line)+'</div>';});
+  html+='</div>';
+  html+='<div class="lablabel">🖥 VM Lab Console</div>';
+  html+='<div class="small">A simulated terminal for this domain. Try a real command below before the knowledge check unlocks.</div>';
+  html+='<div id="labArea">'+renderTerminal(cat.id, idx)+'</div>';
+  html+='<h3 class="head mt2" style="color:var(--mag);font-size:.92rem;letter-spacing:.03em;">Knowledge check</h3>';
+  html+='<div id="quizArea">'+renderQuiz(room.q, false)+'</div>';
+  html+='<div class="mt2" id="roomFooter">'+roomFooterHtml(cat.id, idx)+'</div>';
+  html+='</div>';
+  return html;
+}
+function renderQuiz(questions, showResult){
+  let s='';
+  questions.forEach((q,qi)=>{
+    s+='<div class="qcard"><div class="qmeta">QUESTION '+(qi+1)+' / '+questions.length+'</div><div style="font-size:.92rem;">'+esc(q.t)+'</div>';
+    q.o.forEach((opt,oi)=>{
+      let cls='qopt';
+      const sel = ST._quizSel[qi]===oi;
+      if(showResult){
+        if(oi===q.a) cls+=' correct';
+        else if(sel && oi!==q.a) cls+=' wrong';
+      } else if(sel) cls+=' sel';
+      s+='<button class="'+cls+'" onclick="selectAnswer('+qi+','+oi+')" '+(showResult?'disabled':'')+'><span class="oletter">'+String.fromCharCode(65+oi)+'</span>'+esc(opt)+'</button>';
+    });
+    s+='</div>';
+  });
+  return s;
+}
+function selectAnswer(qi,oi){
+  ST._quizSel[qi]=oi;
+  const questions = ST._screen==='finalexam' ? FINAL_EXAM : CATEGORIES.find(c=>c.id===ST._activeCat).rooms[ST._activeRoom].q;
+  document.getElementById('quizArea').innerHTML = renderQuiz(questions, false);
+}
+function submitRoomQuiz(){
+  const cat=CATEGORIES.find(c=>c.id===ST._activeCat);
+  const room=cat.rooms[ST._activeRoom];
+  let allCorrect=true;
+  room.q.forEach((q,qi)=>{ if(ST._quizSel[qi]!==q.a) allCorrect=false; });
+  document.getElementById('quizArea').innerHTML = renderQuiz(room.q, true);
+  const footer=document.getElementById('roomFooter');
+  if(allCorrect){
+    markRoomComplete(cat.id, ST._activeRoom);
+    footer.innerHTML='<span class="badge on">✔ All correct — room cleared</span> <button class="btn mt" onclick="go(\'category\')">Continue</button>';
+  } else {
+    footer.innerHTML='<span class="small" style="color:var(--red);">Some answers were incorrect — review above and try again.</span><br><button class="btn mag mt" onclick="retryRoom()">Retry room</button>';
+  }
+}
+function retryRoom(){ ST._quizSel={}; go('room'); }
+
+/* ---- DIPLOMAS ---- */
+function viewDiplomas(){
+  let html=topbar('diplomas');
+  html+='<h2 class="head" style="color:var(--ink);font-size:1.4rem;">Certification wall</h2>';
+  html+='<div class="small mt">Complete every room in a domain to earn its diploma. Clear all 100 rooms and score 100% on the Final Exam to earn the Grandmaster Diploma.</div>';
+  html+='<div class="grid3 mt2">';
+  CATEGORIES.forEach(cat=>{
+    const on = ST.diplomas[cat.id];
+    html+='<div class="panel" style="text-align:center;padding:22px 16px;'+(on?'':'opacity:.45;')+'">'+
+      '<div style="font-size:1.9rem;">'+(on?'🏅':'🔒')+'</div>'+
+      '<div class="head" style="font-size:.86rem;margin-top:10px;">'+esc(cat.name)+'</div>'+
+      (on?'<button class="btn outline mt" style="font-size:.68rem;padding:7px 14px;" onclick="go(\'certificate\',{_certCat:\''+cat.id+'\'})">View certificate</button>':'<div class="small mt">Locked</div>')+
+    '</div>';
+  });
+  const gm=isGrandmaster();
+  html+='<div class="panel" style="text-align:center;padding:26px 16px;grid-column:1/-1;'+(gm?'':'opacity:.45;')+'border-color:rgba(255,207,77,.4);">'+
+    '<div style="font-size:2.2rem;">'+(gm?'👑':'🔒')+'</div>'+
+    '<div class="head" style="font-size:1.05rem;margin-top:10px;color:var(--ylw);">Grandmaster diploma</div>'+
+    '<div class="small mt">All 100 rooms cleared + Final Exam 100%</div>'+
+    (gm?'<button class="btn ylw mt" onclick="go(\'grandmaster\')">View certificate</button>':'')+
+  '</div>';
+  html+='</div>';
+  return html;
+}
+const CERT_SPECIALTY = {
+  netfun:'Specialist in Network Security &amp; Infrastructure Defense',
+  linux:'Specialist in Linux Systems &amp; Command-Line Operations',
+  websec:'Specialist in Web Application Security &amp; Exploitation',
+  msf:'Specialist in Penetration Testing &amp; Exploitation Frameworks',
+  crypto:'Specialist in Applied Cryptography &amp; Cryptanalysis',
+  malware:'Specialist in Malware Analysis &amp; Reverse Engineering',
+  forensics:'Specialist in Digital Forensics &amp; Incident Response',
+  cloud:'Specialist in Cloud Infrastructure Security',
+  osint:'Specialist in Open-Source Intelligence &amp; Social Engineering Defense'
+};
+function verifyCode(seed){
+  let h=0; const s=String(seed);
+  for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))>>>0; }
+  return h.toString(36).toUpperCase().padStart(8,'0').slice(0,8);
+}
+function sealSVG(sub){
+  sub = sub || 'VERIFIED CREDENTIAL';
+  const uid = 's'+Math.random().toString(36).slice(2,8);
+  return '<svg class="cert-seal" width="118" height="118" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">'+
+  '<defs><path id="topArc'+uid+'" d="M 22,104 A 82,82 0 1,1 178,104" fill="none"/>'+
+  '<path id="botArc'+uid+'" d="M 46,146 A 66,66 0 0,0 154,146" fill="none"/></defs>'+
+  '<circle cx="100" cy="100" r="95" fill="none" stroke="#1c2c4c" stroke-width="1.6"/>'+
+  '<circle cx="100" cy="100" r="87" fill="none" stroke="#1c2c4c" stroke-width="1"/>'+
+  '<text font-size="12" letter-spacing="2.6" fill="#1c2c4c" font-family="Playfair Display, Georgia, serif" font-weight="700">'+
+  '<textPath href="#topArc'+uid+'" startOffset="50%" text-anchor="middle">CYBERGRID ACADEMY</textPath></text>'+
+  '<text font-size="8.5" letter-spacing="2.2" fill="#1c2c4c" font-family="EB Garamond, serif">'+
+  '<textPath href="#botArc'+uid+'" startOffset="50%" text-anchor="middle">'+esc(sub).toUpperCase()+'</textPath></text>'+
+  '<path d="M100,58 L132,71 L132,106 Q132,138 100,152 Q68,138 68,106 L68,71 Z" fill="none" stroke="#1c2c4c" stroke-width="1.6"/>'+
+  '<text x="100" y="116" font-size="38" font-family="Playfair Display, Georgia, serif" font-weight="800" fill="#1c2c4c" text-anchor="middle">CG</text>'+
+  '<circle cx="30" cy="100" r="2" fill="#a9862f"/><circle cx="170" cy="100" r="2" fill="#a9862f"/>'+
+  '</svg>';
+}
+function viewCert(catId){
+  const cat=CATEGORIES.find(c=>c.id===catId);
+  if(!cat) return viewDiplomas();
+  const code = 'CG-'+catId.slice(0,3).toUpperCase()+'-'+verifyCode(ST.username+catId+(cat.rooms.length));
+  let html=topbar('diplomas');
+  html+='<button class="btn ghost" onclick="go(\'diplomas\')">← Back</button>';
+  html+='<div class="cert-stage mt2"><div class="certsheet"><div class="cert-inner">';
+  html+=sealSVG('Verified Credential');
+  html+='<div class="cert-kicker">CyberGrid Academy</div>';
+  html+='<div class="cert-title">Certificate of Completion</div>';
+  html+='<div class="cert-rule"></div>';
+  html+='<div class="cert-body">This document certifies that the individual named below has successfully completed all <b>'+cat.rooms.length+' modules</b> of the <b>'+esc(cat.name)+'</b> domain within CyberGrid Academy\'s training simulation, demonstrating verified, hands-on proficiency through practical exercises and assessed knowledge checks.</div>';
+  html+='<div class="cert-award-label">AWARDED TO</div>';
+  html+='<div class="cert-name">'+esc(ST.username)+'</div>';
+  html+='<div class="cert-role">'+CERT_SPECIALTY[catId]+'</div>';
+  html+='<div class="cert-sigrow">'+
+    '<div class="cert-sig"><div class="sigline">Grid Directorate</div><div class="capline">Head of Academics</div></div>'+
+    '<div class="cert-sig"><div class="sigline" style="font-family:\'JetBrains Mono\',monospace;font-size:1.05rem;letter-spacing:.03em;">'+new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})+'</div><div class="capline">Date Issued</div></div>'+
+  '</div>';
+  html+='<div class="cert-foot"><span>VERIFICATION CODE: '+code+'</span><span>CYBERGRID ACADEMY · TRAINING SIMULATION</span></div>';
+  html+='</div></div></div>';
+  html+='<div class="cert-actions"><button class="btn" onclick="window.print()">Print / save certificate</button><button class="btn ghost" onclick="go(\'diplomas\')">Back to diplomas</button></div>';
+  return html;
+}
+
+/* ---- FINAL EXAM ---- */
+function viewFinalExam(){
+  let html=topbar('dashboard');
+  html+='<div class="panel">';
+  html+='<div class="small" style="color:var(--ylw);letter-spacing:.04em;">Final certification exam</div>';
+  html+='<h2 class="head" style="color:var(--ink);margin-top:8px;font-size:1.4rem;">Prove your mastery of the grid</h2>';
+  html+='<div class="small mt">Answer all 10 questions correctly to earn the Grandmaster Diploma. You can retry as many times as needed.</div>';
+  html+='<div id="quizArea">'+renderQuiz(FINAL_EXAM, false)+'</div>';
+  html+='<div class="mt2" id="roomFooter"><button class="btn ylw" onclick="submitFinalExam()">Submit exam</button></div>';
+  html+='</div>';
+  return html;
+}
+function submitFinalExam(){
+  let correct=0;
+  FINAL_EXAM.forEach((q,qi)=>{ if(ST._quizSel[qi]===q.a) correct++; });
+  document.getElementById('quizArea').innerHTML = renderQuiz(FINAL_EXAM, true);
+  ST.examScore = correct;
+  const footer=document.getElementById('roomFooter');
+  if(correct===FINAL_EXAM.length){
+    ST.examPassed=true; ST.xp=computeXP(); saveState();
+    confettiBurst();
+    footer.innerHTML='<span class="badge gold">✔ Perfect score — Grandmaster unlocked</span> <button class="btn ylw mt2" onclick="go(\'grandmaster\')">View your diploma</button>';
+  } else {
+    ST.examPassed=false; saveState();
+    footer.innerHTML='<span class="small" style="color:var(--red);">Score: '+correct+'/'+FINAL_EXAM.length+' — 100% required for Grandmaster.</span><br><button class="btn mag mt" onclick="ST._quizSel={};go(\'finalexam\')">Retry exam</button>';
+  }
+}
+
+/* ---- GRANDMASTER CERT ---- */
+function viewGrandmaster(){
+  const code = 'CG-GM-'+verifyCode(ST.username+'grandmaster'+ST.examScore);
+  let html=topbar('diplomas');
+  html+='<div class="cert-stage mt2"><div class="certsheet" style="border-color:rgba(169,134,47,.55);"><div class="cert-inner">';
+  html+=sealSVG('Grandmaster Rank');
+  html+='<div class="cert-kicker">CyberGrid Academy</div>';
+  html+='<div class="cert-title">Certificate of Mastery</div>';
+  html+='<div class="cert-rule"></div>';
+  html+='<div class="cert-body">This document certifies that the individual named below has completed all <b>100 rooms</b> across every domain of CyberGrid Academy and achieved a <b>perfect score</b> on the Final Certification Exam — demonstrating comprehensive, verified mastery of offensive and defensive cybersecurity fundamentals across networking, systems, exploitation, cryptography, forensics, cloud and intelligence disciplines.</div>';
+  html+='<div class="cert-award-label">AWARDED TO</div>';
+  html+='<div class="cert-name">'+esc(ST.username)+'</div>';
+  html+='<div class="cert-role">Grandmaster of the Grid — All Domains Certified</div>';
+  html+='<div class="cert-sigrow">'+
+    '<div class="cert-sig"><div class="sigline">Grid Directorate</div><div class="capline">Head of Academics</div></div>'+
+    '<div class="cert-sig"><div class="sigline" style="font-family:\'JetBrains Mono\',monospace;font-size:1.05rem;letter-spacing:.03em;">'+new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})+'</div><div class="capline">Date Issued</div></div>'+
+  '</div>';
+  html+='<div class="cert-foot"><span>VERIFICATION CODE: '+code+'</span><span>CYBERGRID ACADEMY · TRAINING SIMULATION</span></div>';
+  html+='</div></div></div>';
+  html+='<div class="cert-actions"><button class="btn ylw" onclick="window.print()">Print / save certificate</button><button class="btn ghost" onclick="go(\'diplomas\')">Back to diplomas</button></div>';
+  return html;
+}
+
+/* ---- LEADERBOARD ---- */
+function viewLeaderboard(){
+  let html=topbar('leaderboard');
+  html+='<h2 class="head" style="color:var(--ink);font-size:1.4rem;">Global leaderboard</h2>';
+  html+='<div class="small mt">Ranked by XP across everyone training on this grid.'+(dbReady?'':' (local device only — live sync unavailable in this view)')+'</div>';
+  html+='<div class="panel mt2">';
+  let list = lbCache.slice();
+  if(!dbReady || list.length===0){
+    list = [{username:ST.username,xp:computeXP(),rooms:completedCount(),diplomas:diplomaCount(),grandmaster:isGrandmaster()}];
+  }
+  list.sort((a,b)=>(b.xp||0)-(a.xp||0));
+  if(list.length===0){
+    html+='<div class="small center">No agents ranked yet. Be the first.</div>';
+  } else {
+    list.forEach((row,i)=>{
+      const me = row.username===ST.username;
+      const rankColor = i===0?'var(--ylw)':i===1?'var(--ink-dim)':i===2?'var(--amber)':'var(--ink-faint)';
+      html+='<div class="lbrow '+(me?'me':'')+'">'+
+        '<div class="lbrank" style="color:'+rankColor+';">#'+(i+1)+'</div>'+
+        '<div style="flex:1;">'+(row.grandmaster?'👑 ':'')+esc(row.username||'agent')+(me?' <span class="small">(you)</span>':'')+
+          '<div class="small">'+(row.rooms||0)+' rooms · '+(row.diplomas||0)+' diplomas'+(row.examPassed?' · exam 100%':'')+'</div></div>'+
+        '<div class="head" style="color:var(--grn);">'+(row.xp||0)+' XP</div>'+
+      '</div>';
+    });
+  }
+  html+='</div>';
+  return html;
+}
+
+/* ============ BOOT ============ */
+render();
+if(ST._screen==='login') setTimeout(runBoot, 250);
+if(ST.username){ initDb(); }
+</script>
+</body>
+</html>
